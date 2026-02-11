@@ -31,14 +31,18 @@ export async function getUserStats(userId: string): Promise<UserStats | null> {
 }
 
 export async function updateUserStats(userId: string): Promise<UserStats> {
+  //console.log('updateUserStats called for:', userId);
+
+
   // Get all weekly summaries
   const q = query(
     collection(db, COLLECTIONS.WEEKLY_SUMMARIES),
     where('userId', '==', userId),
-    orderBy('weekId', 'desc')
   );
 
   const querySnapshot = await getDocs(q);
+    //console.log('weeklySummaries found:', querySnapshot.docs.length);
+  //console.log('docs:', querySnapshot.docs.map(d => d.data()));
   const weeklySummaries: WeeklySummary[] = querySnapshot.docs.map(doc => {
     const data = doc.data();
     return {
@@ -143,14 +147,15 @@ export async function getWeeklyProgressHistory(
 
   const querySnapshot = await getDocs(q);
   const progress: WeeklyProgress[] = querySnapshot.docs.slice(0, weeks).map(doc => {
-    const data = doc.data();
-    return {
-      weekId: data.weekId,
-      score: data.score,
-      startDate: data.startDate?.toDate() || new Date(),
-      endDate: data.endDate?.toDate() || new Date(),
-    };
-  });
+  const data = doc.data();
+  return {
+    weekId: data.weekId,
+    score: data.score,
+    totalLogs: data.totalLogs ?? 0,   // ← add this
+    startDate: data.startDate?.toDate() || new Date(),
+    endDate: data.endDate?.toDate() || new Date(),
+  };
+});
 
   return progress.reverse(); // Oldest first for chart
 }

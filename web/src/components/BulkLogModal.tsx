@@ -125,6 +125,7 @@ export function BulkLogModal({
 
             <button
               onClick={() => setShowSearch(true)}
+              disabled={loading}
               className="btn btn-outline w-full gap-2"
             >
               <Plus className="h-5 w-5" />
@@ -134,14 +135,18 @@ export function BulkLogModal({
             <button
               onClick={handleSubmit}
               disabled={loading || selectedPlants.length === 0}
-              className="btn btn-primary w-full"
+              className="btn btn-primary w-full gap-2"
             >
               {loading ? (
-                <span className="loading loading-spinner" />
+                <>
+                  <span className="loading loading-spinner loading-sm" />
+                  Logging {selectedPlants.length} plant{selectedPlants.length !== 1 ? 's' : ''}...
+                </>
               ) : (
-                `Log ${selectedPlants.length} Plant${
-                  selectedPlants.length !== 1 ? 's' : ''
-                }`
+                <>
+                  <Plus className="h-5 w-5" />
+                  Log {selectedPlants.length} Plant{selectedPlants.length !== 1 ? 's' : ''}
+                </>
               )}
             </button>
 

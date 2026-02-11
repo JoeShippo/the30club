@@ -18,6 +18,9 @@ import { COLLECTIONS } from '@/firebase/collections';
 import { PlantLog, getWeekId } from '@30plants/core';
 import { updateWeeklySummary } from './weeklySummaryService';
 import { updateUserStats } from './userStatsService';
+import { trackEvent } from './analytics';
+import { rateLimiter } from '@/utils/rateLimiter';
+import { formatTimeRemaining } from '@/utils/rateLimiter';
 
 export async function createPlantLog(
   userId: string,
@@ -25,6 +28,14 @@ export async function createPlantLog(
   plantName: string,
   loggedAt: Date = new Date()
 ): Promise<PlantLog> {
+
+if (!rateLimiter.checkLimit(userId, 'plant_log')) {
+    const resetTime = rateLimiter.getResetTime(userId, 'plant_log');
+    throw new Error(
+      `Rate limit exceeded. You can log more plants in ${formatTimeRemaining(resetTime)}`
+    );
+  }
+
   const weekId = getWeekId(loggedAt);
 
   const logData = {
@@ -47,6 +58,13 @@ export async function createPlantLog(
     weekId,
     createdAt: new Date(),
   };
+
+  // Track analytics
+  trackEvent('plant_logged', {
+    plantId,
+    plantName,
+    weekId,
+  });
 
   // Update weekly summary and user stats in background
   updateWeeklySummary(userId, weekId).catch(console.error);
@@ -103,4 +121,9 @@ export async function getRecentPlantLogs(
 
 export async function deletePlantLog(logId: string): Promise<void> {
   await deleteDoc(doc(db, COLLECTIONS.PLANT_LOGS, logId));
+  
+  // Track deletion
+  trackEvent('plant_log_deleted', {
+    logId,
+  });
 }

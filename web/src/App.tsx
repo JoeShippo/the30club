@@ -1,6 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import * as Sentry from '@sentry/react';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { OnboardingModal } from './components/OnboardingModal';
+import { useOnboarding } from './hooks/useOnboarding';
+import { useAuth } from './auth/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { HomePage } from './pages/HomePage';
@@ -11,87 +16,66 @@ import { LeaguesPage } from './pages/LeaguesPage';
 import { LeagueDetailPage } from './pages/LeagueDetailPage';
 import { ChallengesPage } from './pages/ChallengesPage';
 import { StatsPage } from './pages/StatsPage';
+import { NotFoundPage } from './pages/NotFoundPage';  // ← Add this
+
+
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { trackPageView } from './services/analytics';
+
+function AppRoutes() {
+  const { currentUser } = useAuth();
+  const { showOnboarding, checking, completeOnboarding } = useOnboarding(currentUser?.id);
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+
+
+  if (checking) return null;
+
+  return (
+    <>
+      {currentUser && showOnboarding && (
+        <OnboardingModal
+          onComplete={(name, avatarId) =>
+            completeOnboarding(name, avatarId, currentUser.id)
+          }
+        />
+      )}
+
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+
+        {/* Protected routes */}
+        <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+        <Route path="/add" element={<ProtectedRoute><AddPlantPage /></ProtectedRoute>} />
+        <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+        <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+        <Route path="/leagues" element={<ProtectedRoute><LeaguesPage /></ProtectedRoute>} />
+        <Route path="/leagues/:leagueId" element={<ProtectedRoute><LeagueDetailPage /></ProtectedRoute>} />
+        <Route path="/challenges" element={<ProtectedRoute><ChallengesPage /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        
+        {/* 404 - Must be last */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </>
+  );
+}
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-
-          {/* Protected routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/add"
-            element={
-              <ProtectedRoute>
-                <AddPlantPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/stats"
-            element={
-              <ProtectedRoute>
-                <StatsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/leaderboard"
-            element={
-              <ProtectedRoute>
-                <LeaderboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/leagues"
-            element={
-              <ProtectedRoute>
-                <LeaguesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/leagues/:leagueId"
-            element={
-              <ProtectedRoute>
-                <LeagueDetailPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/challenges"
-            element={
-              <ProtectedRoute>
-                <ChallengesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

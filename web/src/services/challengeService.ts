@@ -19,12 +19,21 @@ import { getWeekId } from '@30plants/core';
 import { getWeeklySummary } from './weeklySummaryService';
 import { getUserById } from './userService';
 import { unlockAchievement } from './userStatsService';
+import { rateLimiter, formatTimeRemaining } from '@/utils/rateLimiter';
 
 export async function createChallenge(
   challengerId: string,
   opponentId: string,
   weekId?: string
 ): Promise<Challenge> {
+
+  if (!rateLimiter.checkLimit(challengerId, 'challenge_create')) {
+    const resetTime = rateLimiter.getResetTime(challengerId, 'challenge_create');
+    throw new Error(
+      `You're creating challenges too quickly. Try again in ${formatTimeRemaining(resetTime)}`
+    );
+  }
+  
   const challenger = await getUserById(challengerId);
   const opponent = await getUserById(opponentId);
 

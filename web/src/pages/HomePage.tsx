@@ -15,6 +15,8 @@ import { getPlantLogsByUserAndWeek, deletePlantLog } from '@/services/plantLogSe
 import { updateWeeklySummary } from '@/services/weeklySummaryService';
 import { format } from 'date-fns';
 import { Trash2 } from 'lucide-react';
+import { SkeletonLoader } from '@/components/SkeletonLoader';
+
 
 export function HomePage() {
   const { currentUser } = useAuth();
@@ -69,108 +71,140 @@ export function HomePage() {
     }
   };
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <span className="loading loading-spinner loading-lg text-primary" />
+if (loading) {
+  return (
+    <Layout>
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="mb-6 lg:mb-8">
+          <div className="h-8 bg-base-200 rounded w-64 mb-2 animate-pulse" />
+          <div className="h-4 bg-base-200 rounded w-48 animate-pulse" />
         </div>
-      </Layout>
-    );
-  }
+
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+          <div className="space-y-6">
+            <div className="card bg-base-200 animate-pulse">
+              <div className="card-body items-center">
+                <div className="w-52 h-52 rounded-full bg-base-300" />
+              </div>
+            </div>
+            <SkeletonLoader count={2} type="stat" />
+          </div>
+          
+          <div className="space-y-4">
+            <div className="h-6 bg-base-200 rounded w-32 animate-pulse" />
+            <SkeletonLoader count={5} type="card" />
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}
 
   const score = summary?.score ?? 0;
 
   return (
     <Layout>
-      <div className="mx-auto max-w-2xl p-6 space-y-8">
-
+      <div className="p-6 max-w-7xl mx-auto">
+        
         {/* Header */}
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-bold">
-            This Week’s Progress
+        <div className="mb-6 lg:mb-8">
+          <h1 className="text-2xl lg:text-3xl font-bold mb-2">
+            This Week's Progress
           </h1>
           <p className="text-base-content/60">
             {format(startDate, 'MMM d')} – {format(endDate, 'MMM d, yyyy')}
           </p>
         </div>
 
-        {/* Progress Ring */}
-        <div className="flex justify-center">
-          <ProgressRing score={score} target={30} size={220} />
-        </div>
-
-        {/* Stats */}
-        <div className="stats stats-horizontal shadow w-full">
-
-          <div className="stat">
-            <div className="stat-title">Unique Plants</div>
-            <div className="stat-value text-primary">{score}</div>
-          </div>
-
-          <div className="stat">
-            <div className="stat-title">Total Logs</div>
-            <div className="stat-value">{logs.length}</div>
-          </div>
-
-        </div>
-
-        {/* Motivation */}
-        {score >= 30 && (
-          <div className="alert alert-success">
-            🎉 Congratulations! You’ve hit 30 plants this week!
-          </div>
-        )}
-
-        {score >= 20 && score < 30 && (
-          <div className="alert alert-info">
-            You’re doing great! Only {30 - score} more to go.
-          </div>
-        )}
-
-        {score < 20 && (
-          <div className="alert">
-            Keep going! {30 - score} unique plants to reach your goal.
-          </div>
-        )}
-
-        {/* Recent Logs */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Recent Logs</h2>
-
-          {logs.length === 0 ? (
-            <div className="card bg-base-200">
-              <div className="card-body text-center">
-                <p>No plants logged yet this week.</p>
-                <p className="text-sm opacity-70">Tap the + button to get started!</p>
+        {/* Desktop: 2-column grid, Mobile: stacked */}
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+          
+          {/* Left column: Progress + Stats */}
+          <div className="space-y-6">
+            
+            {/* Progress Ring */}
+            <div className="card bg-base-100 shadow">
+              <div className="card-body items-center">
+                <ProgressRing score={score} target={30} size={220} />
               </div>
             </div>
-          ) : (
-            <div className="space-y-2">
-              {logs.map((log) => (
-                <div
-                  key={log.id}
-                  className="card card-compact bg-base-100 shadow"
-                >
-                  <div className="card-body flex-row items-center justify-between">
-                    <div>
-                      <div className="font-medium">{log.plantName}</div>
-                      <div className="text-sm opacity-60">
-                        {format(log.loggedAt, 'MMM d, h:mm a')}
-                      </div>
-                    </div>
 
-                    <button
-                      onClick={() => handleDeleteLog(log.id)}
-                      className="btn btn-ghost btn-sm text-error"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+            {/* Stats cards */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="card bg-base-100 shadow">
+                <div className="card-body p-4 gap-1">
+                  <div className="text-sm opacity-60">Unique Plants</div>
+                  <div className="text-3xl font-bold text-primary">{score}</div>
                 </div>
-              ))}
+              </div>
+
+              <div className="card bg-base-100 shadow">
+                <div className="card-body p-4 gap-1">
+                  <div className="text-sm opacity-60">Total Logs</div>
+                  <div className="text-3xl font-bold">{logs.length}</div>
+                </div>
+              </div>
             </div>
-          )}
+
+            {/* Motivation */}
+            {score >= 30 && (
+              <div className="alert alert-success">
+                🎉 Congratulations! You've hit 30 plants this week!
+              </div>
+            )}
+
+            {score >= 20 && score < 30 && (
+              <div className="alert alert-info">
+                You're doing great! Only {30 - score} more to go.
+              </div>
+            )}
+
+            {score < 20 && (
+              <div className="alert">
+                Keep going! {30 - score} unique plants to reach your goal.
+              </div>
+            )}
+          </div>
+
+          {/* Right column: Recent Logs */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">Recent Logs</h2>
+
+            {logs.length === 0 ? (
+              <div className="card bg-base-200">
+                <div className="card-body text-center gap-2">
+                  <div className="text-5xl">🌱</div>
+                  <p className="font-medium">No plants logged yet this week</p>
+                  <p className="text-sm opacity-70">Tap the + button to get started!</p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {logs.map(log => (
+                  <div
+                    key={log.id}
+                    className="card card-compact bg-base-100 shadow"
+                  >
+                    <div className="card-body flex-row items-center justify-between">
+                      <div>
+                        <div className="font-medium">{log.plantName}</div>
+                        <div className="text-sm opacity-60">
+                          {format(log.loggedAt, 'MMM d, h:mm a')}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleDeleteLog(log.id)}
+                        className="btn btn-ghost btn-sm text-error"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -178,6 +212,7 @@ export function HomePage() {
         achievement={newAchievement}
         onClose={() => setNewAchievement(null)}
       />
+
     </Layout>
   );
 }

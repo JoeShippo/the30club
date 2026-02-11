@@ -11,6 +11,9 @@ import {
 } from '@/services/plantLogService';
 import { Check, Search, Clock, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '@/services/analytics';
+import { rateLimiter, formatTimeRemaining } from '@/utils/rateLimiter';
+
 
 export function AddPlantPage() {
   const { currentUser } = useAuth();
@@ -22,6 +25,7 @@ export function AddPlantPage() {
   const [loading, setLoading] = useState(false);
   const [loggedPlantIds, setLoggedPlantIds] = useState<Set<string>>(new Set());
   const [recentPlants, setRecentPlants] = useState<Plant[]>([]);
+  
 
   useEffect(() => {
     loadLoggedPlants();
@@ -52,37 +56,82 @@ export function AddPlantPage() {
   };
 
   const handleQuickLog = async (plant: Plant) => {
-    if (!currentUser) return;
+  if (!currentUser) return;
 
-    setLoading(true);
-    try {
-      await createPlantLog(currentUser.id, plant.id, plant.name);
-      navigate('/');
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    await createPlantLog(currentUser.id, plant.id, plant.name);
+    navigate('/');
+  } catch (error: any) {
+    if (error.message.includes('Rate limit exceeded')) {
+      alert(error.message);
+    } else {
+      alert('Failed to log plant. Please try again.');
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const handleLogPlant = async () => {
-    if (!currentUser || !selectedPlant) return;
+const handleLogPlant = async () => {
+  if (!currentUser || !selectedPlant) return;
 
-    setLoading(true);
-    try {
-      await createPlantLog(currentUser.id, selectedPlant.id, selectedPlant.name);
-      navigate('/');
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    await createPlantLog(currentUser.id, selectedPlant.id, selectedPlant.name);
+    navigate('/');
+  } catch (error: any) {
+    if (error.message.includes('Rate limit exceeded')) {
+      alert(error.message); // Or use a toast notification
+    } else {
+      alert('Failed to log plant. Please try again.');
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleBulkLog = async (plants: Plant[]) => {
-    if (!currentUser) return;
+  if (!currentUser) return;
 
+  // Check bulk rate limit
+  if (!rateLimiter.checkLimit(currentUser.id, 'bulk_log')) {
+    const resetTime = rateLimiter.getResetTime(currentUser.id, 'bulk_log');
+    alert(
+      `You've used too many bulk logs recently. Try again in ${formatTimeRemaining(resetTime)}`
+    );
+    return;
+  }
+
+  // Check if individual logs would be rate limited
+  const remaining = rateLimiter.getRemaining(currentUser.id, 'plant_log');
+  if (plants.length > remaining) {
+    alert(
+      `You can only log ${remaining} more plants today. Try logging fewer plants or wait 24 hours.`
+    );
+    return;
+  }
+
+  try {
     for (const plant of plants) {
       await createPlantLog(currentUser.id, plant.id, plant.name);
     }
+
+    // Track bulk log event
+    trackEvent('bulk_plants_logged', {
+      count: plants.length,
+      plantIds: plants.map(p => p.id),
+    });
+
     navigate('/');
-  };
+  } catch (error: any) {
+    if (error.message.includes('Rate limit exceeded')) {
+      alert(error.message);
+    } else {
+      alert('Failed to log plants. Please try again.');
+    }
+  }
+};
 
   const isAlreadyLogged = selectedPlant
     ? loggedPlantIds.has(selectedPlant.id)
@@ -90,7 +139,7 @@ export function AddPlantPage() {
 
   return (
     <Layout>
-      <div className="mx-auto max-w-2xl p-6 space-y-6">
+          <div className="p-6 max-w-2xl mx-auto space-y-6">
 
         {/* Header */}
         <h1 className="text-2xl font-bold text-center">

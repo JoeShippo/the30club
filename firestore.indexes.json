@@ -26,6 +26,14 @@
       ]
     },
     {
+      "collectionGroup": "weeklySummaries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "weekId", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "challenges",
       "queryScope": "COLLECTION",
       "fields": [

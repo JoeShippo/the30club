@@ -3,6 +3,10 @@ export interface User {
   email: string;
   displayName: string | null;
   photoURL: string | null;
+  avatarId?: string | null;
+  onboardingComplete?: boolean;
+  hasPro?: boolean;          
+  proUnlockedAt?: Date | null; 
   createdAt: Date;
   updatedAt: Date;
 }
@@ -139,6 +143,7 @@ export interface Achievement {
 export interface WeeklyProgress {
   weekId: string;
   score: number;
+  totalLogs: number;   // ← add this
   startDate: Date;
   endDate: Date;
 }

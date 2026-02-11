@@ -9,6 +9,7 @@ import { getUserLeagues, createLeague, joinLeagueByCode } from '@/services/leagu
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Swords } from 'lucide-react';
+import { ProFeatureGate } from '@/components/ProFeatureGate';
 
 
 export function LeaguesPage() {
@@ -37,11 +38,20 @@ export function LeaguesPage() {
     }
   };
 
-  const handleCreateLeague = async (name: string, description: string) => {
-    if (!currentUser) return;
+const handleCreateLeague = async (name: string, description: string) => {
+  if (!currentUser) return;
+  
+  try {
     await createLeague(name, description, currentUser.id);
     await loadLeagues();
-  };
+  } catch (error: any) {
+    if (error.message.includes('too quickly')) {
+      alert(error.message);
+    } else {
+      alert('Failed to create league. Please try again.');
+    }
+  }
+};
 
   const handleJoinLeague = async (inviteCode: string) => {
     if (!currentUser) return;
@@ -55,17 +65,17 @@ export function LeaguesPage() {
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
-if (loading) {
-  return (
-    <Layout>
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <span className="loading loading-spinner loading-lg text-primary" />
-      </div>
-    </Layout>
-  );
-}
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <span className="loading loading-spinner loading-lg text-primary" />
+        </div>
+      </Layout>
+    );
+  }
 
-return (
+  return (
   <Layout>
     <div className="mx-auto max-w-2xl p-6 space-y-6">
 
@@ -74,6 +84,7 @@ return (
         Social
       </h1>
 
+      <ProFeatureGate feature="leagues">
         <Link
     to="/challenges"
     className="btn btn-outline w-full mb-6 flex items-center gap-2"
@@ -172,7 +183,10 @@ return (
           ))}
         </div>
       )}
+
+      </ProFeatureGate>
     </div>
+    
 
     <CreateLeagueModal
       isOpen={showCreateModal}
@@ -185,7 +199,11 @@ return (
       onClose={() => setShowJoinModal(false)}
       onJoinLeague={handleJoinLeague}
     />
-  </Layout>
+
+      
+
+        
+  </Layout >
 );
 
 }

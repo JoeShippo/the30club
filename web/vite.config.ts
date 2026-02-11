@@ -10,28 +10,29 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
-        name: '30 Plants',
-        short_name: '30 Plants',
+        name: 'The 30 Club',
+        short_name: '30 Club',
         description: 'Track your plant diversity - eat 30 different plants per week',
         theme_color: '#10b981',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
+        start_url: '/',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'manifest-icon-192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'manifest-icon-512.png',
             sizes: '512x512',
             type: 'image/png',
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'manifest-icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable',
@@ -59,6 +60,11 @@ export default defineConfig({
       },
     }),
   ],
+
+  build: {
+    sourcemap: true, // Generate source maps
+  },
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

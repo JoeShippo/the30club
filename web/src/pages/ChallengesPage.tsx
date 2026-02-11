@@ -10,6 +10,8 @@ import {
   updateChallengeScores,
 } from '@/services/challengeService';
 import { format } from 'date-fns';
+import { ProFeatureGate } from '@/components/ProFeatureGate';
+
 
 export function ChallengesPage() {
   const { currentUser } = useAuth();
@@ -105,8 +107,9 @@ export function ChallengesPage() {
           <Swords className="h-7 w-7 text-primary" />
           <h1 className="text-2xl font-bold">My Challenges</h1>
         </div>
+        <ProFeatureGate feature="challenges">
 
-        {/* Tabs */}
+                {/* Tabs */}
         <div className="tabs tabs-bordered px-4">
           <button
             className={`tab ${activeTab === 'active' ? 'tab-active' : ''}`}
@@ -280,6 +283,10 @@ export function ChallengesPage() {
             })
           )}
         </div>
+
+        </ProFeatureGate>
+
+
       </div>
     </Layout>
   );

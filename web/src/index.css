@@ -2,3 +2,14 @@
  @plugin "daisyui" {
    themes: light --default, dark --prefersdark, bumblebee;
  }
+
+ /* Safe area support for notched devices */
+@supports (padding: max(0px)) {
+  .safe-area-inset-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-inset-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+}

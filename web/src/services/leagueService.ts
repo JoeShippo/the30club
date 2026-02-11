@@ -19,6 +19,8 @@ import { generateInviteCode } from '@30plants/core';
 import { getWeeklySummary } from './weeklySummaryService';
 import { getUserById } from './userService';
 import { unlockAchievement } from './userStatsService';
+import { rateLimiter, formatTimeRemaining } from '@/utils/rateLimiter';
+
 
 export async function createLeague(
   name: string,
@@ -26,6 +28,13 @@ export async function createLeague(
   createdBy: string,
   isPrivate: boolean = true
 ): Promise<League> {
+    if (!rateLimiter.checkLimit(createdBy, 'league_create')) {
+    const resetTime = rateLimiter.getResetTime(createdBy, 'league_create');
+    throw new Error(
+      `You're creating leagues too quickly. Try again in ${formatTimeRemaining(resetTime)}`
+    );
+  }
+  
   const inviteCode = generateInviteCode();
   const leagueRef = doc(collection(db, COLLECTIONS.LEAGUES));
   

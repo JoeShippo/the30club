@@ -64,7 +64,8 @@ export function LeaderboardPage() {
 
   return (
     <Layout>
-      <div className="mx-auto max-w-2xl space-y-4">
+          <div className="p-6 max-w-4xl mx-auto space-y-4">
+
 
         {/* Header */}
         <div className="p-6 flex items-center gap-3">
