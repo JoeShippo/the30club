@@ -2,7 +2,7 @@ import { Plant, PlantCategory } from '../types/index.js';
 
 export const CANONICAL_PLANTS: Plant[] = [
   // Vegetables
-  { id: 'arugula', name: 'Arugula', category: PlantCategory.VEGETABLE, isCommon: true },
+{ id: 'rocket', name: 'Rocket', aliases: ['Arugula'], category: PlantCategory.VEGETABLE, isCommon: true },
   { id: 'asparagus', name: 'Asparagus', category: PlantCategory.VEGETABLE, isCommon: true },
   { id: 'beetroot', name: 'Beetroot', category: PlantCategory.VEGETABLE, isCommon: true },
   { id: 'bell-pepper', name: 'Bell Pepper', category: PlantCategory.VEGETABLE, isCommon: true },
@@ -13,9 +13,11 @@ export const CANONICAL_PLANTS: Plant[] = [
   { id: 'carrot', name: 'Carrot', category: PlantCategory.VEGETABLE, isCommon: true },
   { id: 'cauliflower', name: 'Cauliflower', category: PlantCategory.VEGETABLE, isCommon: true },
   { id: 'celery', name: 'Celery', category: PlantCategory.VEGETABLE, isCommon: true },
+  { id: 'chilli-pepper', name: 'Chilli Pepper', aliases: ['Chili Pepper'], category: PlantCategory.VEGETABLE, isCommon: true },
+
   { id: 'corn', name: 'Corn', category: PlantCategory.VEGETABLE, isCommon: true },
   { id: 'cucumber', name: 'Cucumber', category: PlantCategory.VEGETABLE, isCommon: true },
-  { id: 'eggplant', name: 'Eggplant', category: PlantCategory.VEGETABLE, isCommon: true },
+  { id: 'aubergine', name: 'Aubergine', aliases: ['Eggplant'], category: PlantCategory.VEGETABLE, isCommon: true },
   { id: 'kale', name: 'Kale', category: PlantCategory.VEGETABLE, isCommon: true },
   { id: 'lettuce', name: 'Lettuce', category: PlantCategory.VEGETABLE, isCommon: true },
   { id: 'onion', name: 'Onion', category: PlantCategory.VEGETABLE, isCommon: true },
@@ -25,7 +27,11 @@ export const CANONICAL_PLANTS: Plant[] = [
   { id: 'spinach', name: 'Spinach', category: PlantCategory.VEGETABLE, isCommon: true },
   { id: 'sweet-potato', name: 'Sweet Potato', category: PlantCategory.VEGETABLE, isCommon: true },
   { id: 'tomato', name: 'Tomato', category: PlantCategory.VEGETABLE, isCommon: true },
-  { id: 'zucchini', name: 'Zucchini', category: PlantCategory.VEGETABLE, isCommon: true },
+{ id: 'courgette', name: 'Courgette', aliases: ['Zucchini'], category: PlantCategory.VEGETABLE, isCommon: true },
+{ id: 'leek', name: 'Leek', category: PlantCategory.VEGETABLE, isCommon: true },
+{ id: 'spring-onion', name: 'Spring Onion', aliases: ['Scallion', 'Green Onion'], category: PlantCategory.VEGETABLE, isCommon: true },
+{ id: 'butternut-squash', name: 'Butternut Squash', category: PlantCategory.VEGETABLE, isCommon: true },
+{ id: 'chard', name: 'Chard', aliases: ['Swiss Chard'], category: PlantCategory.VEGETABLE, isCommon: false },
 
   // Fruits
   { id: 'apple', name: 'Apple', category: PlantCategory.FRUIT, isCommon: true },
@@ -33,7 +39,11 @@ export const CANONICAL_PLANTS: Plant[] = [
   { id: 'banana', name: 'Banana', category: PlantCategory.FRUIT, isCommon: true },
   { id: 'blackberry', name: 'Blackberry', category: PlantCategory.FRUIT, isCommon: false },
   { id: 'blueberry', name: 'Blueberry', category: PlantCategory.FRUIT, isCommon: true },
+  { id: 'olive', name: 'Olive', category: PlantCategory.FRUIT, isCommon: true },
+  { id: 'blackcurrant', name: 'Blackcurrant', category: PlantCategory.FRUIT, isCommon: false },
   { id: 'cherry', name: 'Cherry', category: PlantCategory.FRUIT, isCommon: true },
+  { id: 'dates', name: 'Dates', category: PlantCategory.FRUIT, isCommon: true },
+{ id: 'raisins', name: 'Raisins', category: PlantCategory.FRUIT, isCommon: true },
   { id: 'coconut', name: 'Coconut', category: PlantCategory.FRUIT, isCommon: false },
   { id: 'cranberry', name: 'Cranberry', category: PlantCategory.FRUIT, isCommon: false },
   { id: 'grape', name: 'Grape', category: PlantCategory.FRUIT, isCommon: true },
@@ -51,6 +61,12 @@ export const CANONICAL_PLANTS: Plant[] = [
   { id: 'raspberry', name: 'Raspberry', category: PlantCategory.FRUIT, isCommon: true },
   { id: 'strawberry', name: 'Strawberry', category: PlantCategory.FRUIT, isCommon: true },
   { id: 'watermelon', name: 'Watermelon', category: PlantCategory.FRUIT, isCommon: true },
+  { id: 'pomegranate', name: 'Pomegranate', category: PlantCategory.FRUIT, isCommon: true },
+{ id: 'fig', name: 'Fig', category: PlantCategory.FRUIT, isCommon: false },
+{ id: 'passionfruit', name: 'Passionfruit', aliases: ['Passion Fruit'], category: PlantCategory.FRUIT, isCommon: false },
+{ id: 'apricot', name: 'Apricot', category: PlantCategory.FRUIT, isCommon: true },
+{ id: 'nectarine', name: 'Nectarine', category: PlantCategory.FRUIT, isCommon: true },
+
 
   // Grains
   { id: 'barley', name: 'Barley', category: PlantCategory.GRAIN, isCommon: false },
@@ -62,6 +78,9 @@ export const CANONICAL_PLANTS: Plant[] = [
   { id: 'rice-white', name: 'White Rice', category: PlantCategory.GRAIN, isCommon: true },
   { id: 'rye', name: 'Rye', category: PlantCategory.GRAIN, isCommon: false },
   { id: 'wheat', name: 'Wheat', category: PlantCategory.GRAIN, isCommon: true },
+  { id: 'spelt', name: 'Spelt', category: PlantCategory.GRAIN, isCommon: false },
+{ id: 'amaranth', name: 'Amaranth', category: PlantCategory.GRAIN, isCommon: false },
+
 
   // Legumes
   { id: 'black-beans', name: 'Black Beans', category: PlantCategory.LEGUME, isCommon: true },
@@ -72,6 +91,10 @@ export const CANONICAL_PLANTS: Plant[] = [
   { id: 'peanuts', name: 'Peanuts', category: PlantCategory.LEGUME, isCommon: true },
   { id: 'peas', name: 'Peas', category: PlantCategory.LEGUME, isCommon: true },
   { id: 'soybeans', name: 'Soybeans', category: PlantCategory.LEGUME, isCommon: true },
+  { id: 'butter-beans', name: 'Butter Beans', aliases: ['Lima Beans'], category: PlantCategory.LEGUME, isCommon: true },
+{ id: 'cannellini-beans', name: 'Cannellini Beans', aliases: ['White Kidney Beans'], category: PlantCategory.LEGUME, isCommon: true },
+{ id: 'broad-beans', name: 'Broad Beans', aliases: ['Fava Beans'], category: PlantCategory.LEGUME, isCommon: true },
+
 
   // Nuts & Seeds
   { id: 'almonds', name: 'Almonds', category: PlantCategory.NUT_SEED, isCommon: true },
@@ -87,13 +110,18 @@ export const CANONICAL_PLANTS: Plant[] = [
   { id: 'pumpkin-seeds', name: 'Pumpkin Seeds', category: PlantCategory.NUT_SEED, isCommon: true },
   { id: 'sesame-seeds', name: 'Sesame Seeds', category: PlantCategory.NUT_SEED, isCommon: true },
   { id: 'sunflower-seeds', name: 'Sunflower Seeds', category: PlantCategory.NUT_SEED, isCommon: true },
+  { id: 'chestnuts', name: 'Chestnuts', category: PlantCategory.NUT_SEED, isCommon: false },
+  { id: 'mustard-seeds', name: 'Mustard Seeds', category: PlantCategory.NUT_SEED, isCommon: false },
+{ id: 'poppy-seeds', name: 'Poppy Seeds', category: PlantCategory.NUT_SEED, isCommon: false },
+
+
   { id: 'walnuts', name: 'Walnuts', category: PlantCategory.NUT_SEED, isCommon: true },
 
   // Herbs & Spices
   { id: 'basil', name: 'Basil', category: PlantCategory.HERB_SPICE, isCommon: true },
   { id: 'black-pepper', name: 'Black Pepper', category: PlantCategory.HERB_SPICE, isCommon: true },
   { id: 'cayenne', name: 'Cayenne', category: PlantCategory.HERB_SPICE, isCommon: false },
-  { id: 'cilantro', name: 'Cilantro', category: PlantCategory.HERB_SPICE, isCommon: true },
+{ id: 'coriander', name: 'Coriander', aliases: ['Cilantro'], category: PlantCategory.HERB_SPICE, isCommon: true },
   { id: 'cinnamon', name: 'Cinnamon', category: PlantCategory.HERB_SPICE, isCommon: true },
   { id: 'cumin', name: 'Cumin', category: PlantCategory.HERB_SPICE, isCommon: true },
   { id: 'dill', name: 'Dill', category: PlantCategory.HERB_SPICE, isCommon: false },
@@ -106,19 +134,29 @@ export const CANONICAL_PLANTS: Plant[] = [
   { id: 'rosemary', name: 'Rosemary', category: PlantCategory.HERB_SPICE, isCommon: true },
   { id: 'thyme', name: 'Thyme', category: PlantCategory.HERB_SPICE, isCommon: true },
   { id: 'turmeric', name: 'Turmeric', category: PlantCategory.HERB_SPICE, isCommon: true },
+  { id: 'chives', name: 'Chives', category: PlantCategory.HERB_SPICE, isCommon: true },
+{ id: 'sage', name: 'Sage', category: PlantCategory.HERB_SPICE, isCommon: true },
+{ id: 'bay-leaf', name: 'Bay Leaf', aliases: ['Bay Leaves'], category: PlantCategory.HERB_SPICE, isCommon: false },
+
 
   // Mushrooms
   { id: 'button-mushroom', name: 'Button Mushroom', category: PlantCategory.MUSHROOM, isCommon: true },
   { id: 'portobello', name: 'Portobello', category: PlantCategory.MUSHROOM, isCommon: true },
   { id: 'shiitake', name: 'Shiitake', category: PlantCategory.MUSHROOM, isCommon: true },
   { id: 'oyster-mushroom', name: 'Oyster Mushroom', category: PlantCategory.MUSHROOM, isCommon: false },
-  { id: 'cremini', name: 'Cremini', category: PlantCategory.MUSHROOM, isCommon: true },
+  { id: 'porcini', name: 'Porcini', category: PlantCategory.MUSHROOM, isCommon: false },
+  { id: 'white-mushroom', name: 'White Mushroom', aliases: ['White Button Mushroom'], category: PlantCategory.MUSHROOM, isCommon: true },
+  { id: 'chestnut-mushroom', name: 'Chestnut Mushroom', aliases: ['Brown Mushroom'], category: PlantCategory.MUSHROOM,  isCommon: true },
 
   // Seaweed
   { id: 'nori', name: 'Nori', category: PlantCategory.SEAWEED, isCommon: false },
   { id: 'wakame', name: 'Wakame', category: PlantCategory.SEAWEED, isCommon: false },
   { id: 'kombu', name: 'Kombu', category: PlantCategory.SEAWEED, isCommon: false },
   { id: 'spirulina', name: 'Spirulina', category: PlantCategory.SEAWEED, isCommon: false },
+  { id: 'coffee', name: 'Coffee', category: PlantCategory.PLANT_PRODUCT, isCommon: true },
+  { id: 'tea', name: 'Tea', category: PlantCategory.PLANT_PRODUCT, isCommon: true },
+  { id: 'extra-virgin-olive-oil', name: 'Extra Virgin Olive Oil', aliases: ['EVOO'], category: PlantCategory.PLANT_PRODUCT, isCommon: true },
+  { id: 'dark-chocolate-70', name: 'Dark Chocolate (70%+ Cocoa)', category: PlantCategory.PLANT_PRODUCT, isCommon: true },
 ];
 
 export function getPlantById(id: string): Plant | undefined {

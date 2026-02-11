@@ -1,10 +1,9 @@
 import type { WeeklySummary, AllTimeStats } from '../types/index.js';
-
 import { getWeekId } from '../scoring/index.js';
-import { subWeeks, parseISO } from 'date-fns';
+import { subWeeks } from 'date-fns';
 
 /**
- * Calculate current streak (consecutive weeks with at least 1 plant)
+ * Calculate current and longest streak (consecutive weeks with at least 1 plant)
  */
 export function calculateStreak(weeklySummaries: WeeklySummary[]): {
   currentStreak: number;
@@ -14,47 +13,46 @@ export function calculateStreak(weeklySummaries: WeeklySummary[]): {
     return { currentStreak: 0, longestStreak: 0 };
   }
 
-  // Sort by week ID descending (most recent first)
+  // Only count weeks with at least 1 plant, sort descending
   const sorted = [...weeklySummaries]
     .filter(s => s.score > 0)
     .sort((a, b) => b.weekId.localeCompare(a.weekId));
 
-  let currentStreak = 0;
-  let longestStreak = 0;
-  let tempStreak = 0;
+  if (sorted.length === 0) {
+    return { currentStreak: 0, longestStreak: 0 };
+  }
 
-  // Calculate current streak from most recent week
-  const currentWeekId = getWeekId(new Date());
-  let expectedWeek = currentWeekId;
+  // --- Current streak ---
+  // Walk backwards from the current week, counting consecutive active weeks
+  let currentStreak = 0;
+  let expectedWeekId = getWeekId(new Date());
 
   for (const summary of sorted) {
-    if (summary.weekId === expectedWeek) {
+    if (summary.weekId === expectedWeekId) {
       currentStreak++;
-      tempStreak++;
-      
-      // Move to previous week
-      const weekDate = parseISO(expectedWeek + '-1');
-      expectedWeek = getWeekId(subWeeks(weekDate, 1));
-    } else {
+      // Step back one week using a date we know is in that week (Monday)
+      const mondayOfExpected = getMondayOfWeek(expectedWeekId);
+      expectedWeekId = getWeekId(subWeeks(mondayOfExpected, 1));
+    } else if (summary.weekId < expectedWeekId) {
+      // There's a gap - streak is broken
       break;
     }
   }
 
-  // Calculate longest streak
-  tempStreak = 0;
-  for (let i = 0; i < sorted.length; i++) {
-    if (i === 0) {
-      tempStreak = 1;
+  // --- Longest streak ---
+  let longestStreak = 0;
+  let tempStreak = 1;
+
+  // sorted is descending, so sorted[0] is most recent
+  for (let i = 1; i < sorted.length; i++) {
+    const prevMonday = getMondayOfWeek(sorted[i - 1].weekId);
+    const expectedPrevWeekId = getWeekId(subWeeks(prevMonday, 1));
+
+    if (sorted[i].weekId === expectedPrevWeekId) {
+      tempStreak++;
     } else {
-      const currentDate = parseISO(sorted[i].weekId + '-1');
-      const expectedPrevious = getWeekId(subWeeks(currentDate, -1));
-      
-      if (sorted[i - 1].weekId === expectedPrevious) {
-        tempStreak++;
-      } else {
-        longestStreak = Math.max(longestStreak, tempStreak);
-        tempStreak = 1;
-      }
+      longestStreak = Math.max(longestStreak, tempStreak);
+      tempStreak = 1;
     }
   }
   longestStreak = Math.max(longestStreak, tempStreak);
@@ -63,55 +61,24 @@ export function calculateStreak(weeklySummaries: WeeklySummary[]): {
 }
 
 /**
- * Check which achievements should be unlocked
+ * Get the Monday Date object for a given weekId (e.g. "2026-W05")
  */
-export function checkAchievements(
-  userStats: any,
-  weeklySummaries: WeeklySummary[],
-  existingAchievements: string[]
-): string[] {
-  const newAchievements: string[] = [];
+function getMondayOfWeek(weekId: string): Date {
+  const [yearStr, weekStr] = weekId.split('-W');
+  const year = parseInt(yearStr);
+  const week = parseInt(weekStr);
 
-  // First plant
-  if (!existingAchievements.includes('first_plant') && userStats.totalLogs > 0) {
-    newAchievements.push('first_plant');
-  }
+  // Jan 4 is always in ISO week 1
+  const jan4 = new Date(year, 0, 4);
+  // Find the Monday of week 1
+  const dayOfWeek = jan4.getDay() || 7; // Convert Sunday (0) to 7
+  const monday = new Date(jan4);
+  monday.setDate(jan4.getDate() - dayOfWeek + 1);
 
-  // Milestone achievements
-  const bestScore = userStats.bestWeekScore;
-  if (!existingAchievements.includes('reached_10') && bestScore >= 10) {
-    newAchievements.push('reached_10');
-  }
-  if (!existingAchievements.includes('reached_20') && bestScore >= 20) {
-    newAchievements.push('reached_20');
-  }
-  if (!existingAchievements.includes('reached_30') && bestScore >= 30) {
-    newAchievements.push('reached_30');
-  }
-  if (!existingAchievements.includes('reached_40') && bestScore >= 40) {
-    newAchievements.push('reached_40');
-  }
+  // Add (week - 1) * 7 days to get to the right week's Monday
+  monday.setDate(monday.getDate() + (week - 1) * 7);
 
-  // Streak achievements
-  const { currentStreak, longestStreak } = calculateStreak(weeklySummaries);
-  const maxStreak = Math.max(currentStreak, longestStreak);
-  
-  if (!existingAchievements.includes('streak_3') && maxStreak >= 3) {
-    newAchievements.push('streak_3');
-  }
-  if (!existingAchievements.includes('streak_5') && maxStreak >= 5) {
-    newAchievements.push('streak_5');
-  }
-  if (!existingAchievements.includes('streak_10') && maxStreak >= 10) {
-    newAchievements.push('streak_10');
-  }
-
-  // Total unique plants
-  if (!existingAchievements.includes('total_100') && userStats.totalUniquePlants >= 100) {
-    newAchievements.push('total_100');
-  }
-
-  return newAchievements;
+  return monday;
 }
 
 /**
@@ -153,5 +120,43 @@ export function calculateAllTimeStats(
 }
 
 /**
- * Get streak count (consecutive weeks with at least 1 plant)
+ * Check which achievements should be unlocked based on current stats
  */
+export function checkAchievements(
+  userStats: {
+    totalLogs: number;
+    totalUniquePlants: number;
+    bestWeekScore: number;
+  },
+  weeklySummaries: WeeklySummary[],
+  existingAchievements: string[]
+): string[] {
+  const newAchievements: string[] = [];
+
+  const add = (id: string) => {
+    if (!existingAchievements.includes(id)) {
+      newAchievements.push(id);
+    }
+  };
+
+  // First plant logged
+  if (userStats.totalLogs > 0) add('first_plant');
+
+  // Weekly score milestones
+  if (userStats.bestWeekScore >= 10) add('reached_10');
+  if (userStats.bestWeekScore >= 20) add('reached_20');
+  if (userStats.bestWeekScore >= 30) add('reached_30');
+  if (userStats.bestWeekScore >= 40) add('reached_40');
+
+  // Streak milestones
+  const { currentStreak, longestStreak } = calculateStreak(weeklySummaries);
+  const maxStreak = Math.max(currentStreak, longestStreak);
+  if (maxStreak >= 3) add('streak_3');
+  if (maxStreak >= 5) add('streak_5');
+  if (maxStreak >= 10) add('streak_10');
+
+  // All-time unique plants
+  if (userStats.totalUniquePlants >= 100) add('total_100');
+
+  return newAchievements;
+}

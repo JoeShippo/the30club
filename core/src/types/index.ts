@@ -11,6 +11,7 @@ export interface Plant {
   id: string;
   name: string;
   category: PlantCategory;
+  aliases?: string[];
   isCommon: boolean;
 }
 
@@ -23,6 +24,7 @@ export enum PlantCategory {
   HERB_SPICE = 'herb_spice',
   MUSHROOM = 'mushroom',
   SEAWEED = 'seaweed',
+  PLANT_PRODUCT = 'plant_product',
   OTHER = 'other'
 }
 
