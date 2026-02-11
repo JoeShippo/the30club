@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId);
+      allow delete: if false;
+    }
+    
+    // Plant logs collection
+    match /plantLogs/{logId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.keys().hasAll(['userId', 'plantId', 'plantName', 'loggedAt', 'weekId']);
+      allow update: if false;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Weekly summaries collection
+    match /weeklySummaries/{summaryId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && 
+                              request.resource.data.userId == request.auth.uid;
+      allow delete: if false;
+    }
+    
+    // All-time stats collection
+    match /allTimeStats/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isOwner(userId);
+      allow delete: if false;
+    }
+    
+    // Leagues collection
+    match /leagues/{leagueId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+    }
+    
+    // League memberships collection
+    match /leagueMemberships/{membershipId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Challenges collection
+    match /challenges/{challengeId} {
+      allow read: if isSignedIn() && 
+                    (resource.data.challengerId == request.auth.uid || 
+                     resource.data.opponentId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.challengerId == request.auth.uid;
+      allow update: if isSignedIn() && 
+                      (resource.data.challengerId == request.auth.uid || 
+                       resource.data.opponentId == request.auth.uid);
+      allow delete: if false;
+    }
+  }
+}
