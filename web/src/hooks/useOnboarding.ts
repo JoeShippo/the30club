@@ -11,12 +11,17 @@ export function useOnboarding(userId: string | undefined) {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checking, setChecking] = useState(true);
 
-  useEffect(() => {
-    if (!userId) return;
-    const done = localStorage.getItem(`${ONBOARDING_KEY}_${userId}`);
-    setShowOnboarding(!done);
-    setChecking(false);
-  }, [userId]);
+ useEffect(() => {
+  if (!userId) {
+    setChecking(false);   // ← CRITICAL
+    return;
+  }
+
+  const done = localStorage.getItem(`${ONBOARDING_KEY}_${userId}`);
+  setShowOnboarding(!done);
+  setChecking(false);
+}, [userId]);
+
 
   const completeOnboarding = async (
     displayName: string,
