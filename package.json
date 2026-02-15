@@ -1,0 +1,11 @@
+{
+  "name": "the30club-monorepo",
+  "private": true,
+  "workspaces": [
+    "web",
+    "core"
+  ],
+  "scripts": {
+    "install-all": "npm install"
+  }
+}
