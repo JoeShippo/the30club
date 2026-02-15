@@ -2,15 +2,60 @@
 <html lang="en" data-theme="bumblebee">
   <head>
     <meta charset="UTF-8" />
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- Viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- Theme & Color -->
     <meta name="theme-color" content="#10b981" />
-    <meta name="description" content="Track your plant diversity - eat 30 different plants per week" />
-    <title>30 Plants</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="The 30 Club" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- SEO -->
+    <meta name="description" content="Track your plant diversity journey. Eat 30 different plants per week for better gut health and wellbeing." />
+    <meta name="keywords" content="plant diversity, gut health, nutrition tracking, 30 plants, healthy eating" />
+    <meta name="author" content="The 30 Club" />
+    
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://app.the30club.com/" />
+    <meta property="og:title" content="The 30 Club - Track Your Plant Diversity" />
+    <meta property="og:description" content="Track your plant diversity journey. Eat 30 different plants per week for better gut health." />
+    <meta property="og:image" content="https://app.the30club.com/og-image.png" />
+    <meta property="og:site_name" content="The 30 Club" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://app.the30club.com/" />
+    <meta name="twitter:title" content="The 30 Club - Track Your Plant Diversity" />
+    <meta name="twitter:description" content="Track your plant diversity journey. Eat 30 different plants per week for better gut health." />
+    <meta name="twitter:image" content="https://app.the30club.com/og-image.png" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://app.the30club.com/" />
+    
+    <!-- Title -->
+    <title>The 30 Club - Track Your Plant Diversity</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- No-JS Fallback -->
+    <noscript>
+      <div style="padding: 2rem; text-align: center; font-family: system-ui, -apple-system, sans-serif;">
+        <h1>🌱 The 30 Club</h1>
+        <p>JavaScript is required to use this app.</p>
+        <p>Please enable JavaScript in your browser settings.</p>
+      </div>
+    </noscript>
   </body>
 </html>
