@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import * as Sentry from '@sentry/react';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { OnboardingModal } from './components/OnboardingModal';
 import { useOnboarding } from './hooks/useOnboarding';

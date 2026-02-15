@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { useAuth } from '@/auth/AuthContext';
-import { LogOut, User as UserIcon, Mail, Trash2, Shield, ChevronRight } from 'lucide-react';
+import { LogOut, Mail, Trash2, Shield, ChevronRight } from 'lucide-react';
 import { PlantAvatar } from '@/components/PlantAvatar';
 import { useNavigate } from 'react-router-dom';
 import { deleteAccount } from '@/services/deleteAccountService';

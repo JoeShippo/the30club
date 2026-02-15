@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Home, ArrowLeft, Search } from 'lucide-react';
+import { Home, ArrowLeft } from 'lucide-react';
 
 export function NotFoundPage() {
   const navigate = useNavigate();
