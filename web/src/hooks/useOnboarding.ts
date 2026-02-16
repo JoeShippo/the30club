@@ -3,25 +3,22 @@ import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/firebase/config';
 import { COLLECTIONS } from '@/firebase/collections';
 import { trackEvent } from '@/services/analytics';
+import { User } from '@core/types';
 
-
-const ONBOARDING_KEY = 'onboarding_complete';
-
-export function useOnboarding(userId: string | undefined) {
+export function useOnboarding(user: User | null) {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checking, setChecking] = useState(true);
 
- useEffect(() => {
-  if (!userId) {
-    setChecking(false);   // ← CRITICAL
-    return;
-  }
+  useEffect(() => {
+    if (!user) {
+      setChecking(false);
+      return;
+    }
 
-  const done = localStorage.getItem(`${ONBOARDING_KEY}_${userId}`);
-  setShowOnboarding(!done);
-  setChecking(false);
-}, [userId]);
-
+    // User data already loaded by AuthContext, just check the flag
+    setShowOnboarding(!user.onboardingComplete);
+    setChecking(false);
+  }, [user]);
 
   const completeOnboarding = async (
     displayName: string,
@@ -36,10 +33,7 @@ export function useOnboarding(userId: string | undefined) {
       updatedAt: serverTimestamp(),
     });
 
-    // Mark locally so we don't show again
-    localStorage.setItem(`${ONBOARDING_KEY}_${userId}`, 'true');
-
-        // Track completion
+    // Track completion
     trackEvent('onboarding_completed', {
       avatarId,
       hasDisplayName: !!displayName,

@@ -15,8 +15,7 @@ import { LeaguesPage } from './pages/LeaguesPage';
 import { LeagueDetailPage } from './pages/LeagueDetailPage';
 import { ChallengesPage } from './pages/ChallengesPage';
 import { StatsPage } from './pages/StatsPage';
-import { NotFoundPage } from './pages/NotFoundPage';  // ← Add this
-
+import { NotFoundPage } from './pages/NotFoundPage';
 
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -24,13 +23,12 @@ import { trackPageView } from './services/analytics';
 
 function AppRoutes() {
   const { currentUser } = useAuth();
-  const { showOnboarding, checking, completeOnboarding } = useOnboarding(currentUser?.id);
+  const { showOnboarding, checking, completeOnboarding } = useOnboarding(currentUser); // ← Changed from currentUser?.id to currentUser
   const location = useLocation();
 
   useEffect(() => {
     trackPageView(location.pathname);
   }, [location.pathname]);
-
 
   if (checking) return null;
 
