@@ -3,7 +3,6 @@ import { useAuth } from '@/auth/AuthContext';
 import { Layout } from '@/components/Layout';
 import { ProgressRing } from '@/components/ProgressRing';
 import { AchievementToast } from '@/components/AchievementToast';
-import { ACHIEVEMENTS } from '@30plants/core';
 import {
   getWeekId,
   getWeekDates,
@@ -26,7 +25,7 @@ export function HomePage() {
   const [logs, setLogs] = useState<PlantLog[]>([]);
   const [summary, setSummary] = useState<WeeklySummary | null>(null);
   const [newAchievement, setNewAchievement] = useState<Achievement | null>(null);
-  const [previousAchievementIds, setPreviousAchievementIds] = useState<Set<string>>(new Set());
+  //const [previousAchievementIds, setPreviousAchievementIds] = useState<Set<string>>(new Set());
 
   const currentWeekId = getWeekId(new Date());
   const { startDate, endDate } = getWeekDates(currentWeekId);
@@ -78,7 +77,7 @@ export function HomePage() {
         JSON.stringify(Array.from(currentAchievementIds))
       );
       
-      setPreviousAchievementIds(currentAchievementIds);
+      //setPreviousAchievementIds(currentAchievementIds);
     }
   } catch (error) {
   } finally {
