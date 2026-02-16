@@ -42,6 +42,8 @@ export function PlantSearchModal({
       results = results.filter(p => p.category === selectedFilter);
     }
 
+    results.sort((a, b) => a.name.localeCompare(b.name));
+
     setFilteredPlants(results);
   }, [searchQuery, selectedFilter]);
 

@@ -14,7 +14,6 @@ import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '@/services/analytics';
 import { rateLimiter, formatTimeRemaining } from '@/utils/rateLimiter';
 
-
 export function AddPlantPage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -25,7 +24,6 @@ export function AddPlantPage() {
   const [loading, setLoading] = useState(false);
   const [loggedPlantIds, setLoggedPlantIds] = useState<Set<string>>(new Set());
   const [recentPlants, setRecentPlants] = useState<Plant[]>([]);
-  
 
   useEffect(() => {
     loadLoggedPlants();
@@ -56,82 +54,93 @@ export function AddPlantPage() {
   };
 
   const handleQuickLog = async (plant: Plant) => {
-  if (!currentUser) return;
+    if (!currentUser) return;
 
-  setLoading(true);
-  try {
-    await createPlantLog(currentUser.id, plant.id, plant.name);
-    navigate('/');
-  } catch (error: any) {
-    if (error.message.includes('Rate limit exceeded')) {
-      alert(error.message);
-    } else {
-      alert('Failed to log plant. Please try again.');
+    setLoading(true);
+    try {
+      await createPlantLog(currentUser.id, plant.id, plant.name);
+      
+      // Mark that we just logged a plant
+      sessionStorage.setItem('just_logged_plant', 'true');
+      
+      navigate('/');
+    } catch (error: any) {
+      if (error.message.includes('Rate limit exceeded')) {
+        alert(error.message);
+      } else {
+        alert('Failed to log plant. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-const handleLogPlant = async () => {
-  if (!currentUser || !selectedPlant) return;
+  const handleLogPlant = async () => {
+    if (!currentUser || !selectedPlant) return;
 
-  setLoading(true);
-  try {
-    await createPlantLog(currentUser.id, selectedPlant.id, selectedPlant.name);
-    navigate('/');
-  } catch (error: any) {
-    if (error.message.includes('Rate limit exceeded')) {
-      alert(error.message); // Or use a toast notification
-    } else {
-      alert('Failed to log plant. Please try again.');
+    setLoading(true);
+    try {
+      await createPlantLog(currentUser.id, selectedPlant.id, selectedPlant.name);
+      
+      // Mark that we just logged a plant
+      sessionStorage.setItem('just_logged_plant', 'true');
+      
+      navigate('/');
+    } catch (error: any) {
+      if (error.message.includes('Rate limit exceeded')) {
+        alert(error.message);
+      } else {
+        alert('Failed to log plant. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleBulkLog = async (plants: Plant[]) => {
-  if (!currentUser) return;
+    if (!currentUser) return;
 
-  // Check bulk rate limit
-  if (!rateLimiter.checkLimit(currentUser.id, 'bulk_log')) {
-    const resetTime = rateLimiter.getResetTime(currentUser.id, 'bulk_log');
-    alert(
-      `You've used too many bulk logs recently. Try again in ${formatTimeRemaining(resetTime)}`
-    );
-    return;
-  }
-
-  // Check if individual logs would be rate limited
-  const remaining = rateLimiter.getRemaining(currentUser.id, 'plant_log');
-  if (plants.length > remaining) {
-    alert(
-      `You can only log ${remaining} more plants today. Try logging fewer plants or wait 24 hours.`
-    );
-    return;
-  }
-
-  try {
-    for (const plant of plants) {
-      await createPlantLog(currentUser.id, plant.id, plant.name);
+    // Check bulk rate limit
+    if (!rateLimiter.checkLimit(currentUser.id, 'bulk_log')) {
+      const resetTime = rateLimiter.getResetTime(currentUser.id, 'bulk_log');
+      alert(
+        `You've used too many bulk logs recently. Try again in ${formatTimeRemaining(resetTime)}`
+      );
+      return;
     }
 
-    // Track bulk log event
-    trackEvent('bulk_plants_logged', {
-      count: plants.length,
-      plantIds: plants.map(p => p.id),
-    });
-
-    navigate('/');
-  } catch (error: any) {
-    if (error.message.includes('Rate limit exceeded')) {
-      alert(error.message);
-    } else {
-      alert('Failed to log plants. Please try again.');
+    // Check if individual logs would be rate limited
+    const remaining = rateLimiter.getRemaining(currentUser.id, 'plant_log');
+    if (plants.length > remaining) {
+      alert(
+        `You can only log ${remaining} more plants today. Try logging fewer plants or wait 24 hours.`
+      );
+      return;
     }
-  }
-};
+
+    try {
+      for (const plant of plants) {
+        await createPlantLog(currentUser.id, plant.id, plant.name);
+      }
+
+      // Track bulk log event
+      trackEvent('bulk_plants_logged', {
+        count: plants.length,
+        plantIds: plants.map(p => p.id),
+      });
+
+      // Mark that we just logged plants
+      sessionStorage.setItem('just_logged_plant', 'true');
+
+      navigate('/');
+    } catch (error: any) {
+      if (error.message.includes('Rate limit exceeded')) {
+        alert(error.message);
+      } else {
+        alert('Failed to log plants. Please try again.');
+      }
+    }
+  };
 
   const isAlreadyLogged = selectedPlant
     ? loggedPlantIds.has(selectedPlant.id)
@@ -139,7 +148,7 @@ const handleLogPlant = async () => {
 
   return (
     <Layout>
-          <div className="p-6 max-w-2xl mx-auto space-y-6">
+      <div className="p-6 max-w-2xl mx-auto space-y-6">
 
         {/* Header */}
         <h1 className="text-2xl font-bold text-center">
@@ -238,7 +247,7 @@ const handleLogPlant = async () => {
                 className="btn btn-primary w-full"
               >
                 {loading && <span className="loading loading-spinner" />}
-                {!loading && isAlreadyLogged && 'Log Again (Won’t Increase Score)'}
+                {!loading && isAlreadyLogged && 'Log Again (Won\'t Increase Score)'}
                 {!loading && !isAlreadyLogged && 'Log Plant'}
               </button>
 
@@ -252,7 +261,7 @@ const handleLogPlant = async () => {
             <h3 className="font-medium">How it works</h3>
             <ul className="text-sm opacity-70 space-y-1">
               <li>• Each unique plant counts once per week</li>
-              <li>• Logging again won’t increase your score</li>
+              <li>• Logging again won't increase your score</li>
               <li>• Weeks reset every Monday</li>
               <li>• Goal: 30 different plants per week</li>
             </ul>
