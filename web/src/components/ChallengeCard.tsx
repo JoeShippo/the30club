@@ -1,7 +1,6 @@
 import { Challenge, ChallengeStatus } from '@30plants/core';
 import { PlantAvatar } from './PlantAvatar';
 import { Trophy, Swords, Check, X, Clock } from 'lucide-react';
-import { format } from 'date-fns';
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -36,6 +35,7 @@ export function ChallengeCard({
   const myScore = isChallenger ? challenge.challengerScore : challenge.opponentScore;
   const theirScore = isChallenger ? challenge.opponentScore : challenge.challengerScore;
   const opponent = isChallenger ? opponentUser : challengerUser;
+
 
   const getStatusBadge = () => {
     if (isPending && !isChallenger) {
@@ -134,7 +134,7 @@ export function ChallengeCard({
 
         {isActive && (
           <div className="text-center text-sm opacity-60 mt-2">
-            Week of {format(new Date(challenge.weekId), 'MMM d')}
+            Week of {challenge.weekId}
           </div>
         )}
 

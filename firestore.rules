@@ -107,24 +107,27 @@ service cloud.firestore {
     }
     
     // Challenges collection
-    match /challenges/{challengeId} {
-      // Only participants can read their challenges
-      allow read: if isSignedIn() && 
-                     (resource.data.challengerId == request.auth.uid || 
-                      resource.data.opponentId == request.auth.uid);
-      
-      // Only the challenger can create challenges
-      allow create: if isSignedIn() && 
-                       request.resource.data.challengerId == request.auth.uid;
-      
-      // Only participants can update (accepting/declining)
-      allow update: if isSignedIn() && 
-                       (resource.data.challengerId == request.auth.uid || 
-                        resource.data.opponentId == request.auth.uid);
-      
-      // No deletion allowed
-      allow delete: if false;
-    }
+match /challenges/{challengeId} {
+  // Participants can read their challenges
+  // Also allow reading if you're the winner (for stats calculation)
+  allow read: if isSignedIn() && 
+                 (resource.data.challengerId == request.auth.uid || 
+                  resource.data.opponentId == request.auth.uid ||
+                  resource.data.winnerId == request.auth.uid);
+  
+  // Only the challenger can create challenges
+  allow create: if isSignedIn() && 
+                   request.resource.data.challengerId == request.auth.uid;
+  
+  // Participants can update (accepting/declining)
+  // Cloud Functions can also update (they have admin access)
+  allow update: if isSignedIn() && 
+                   (resource.data.challengerId == request.auth.uid || 
+                    resource.data.opponentId == request.auth.uid);
+  
+  // No deletion allowed
+  allow delete: if false;
+}
     
     // Deny everything else by default
     match /{document=**} {

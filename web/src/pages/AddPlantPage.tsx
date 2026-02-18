@@ -13,6 +13,8 @@ import { Check, Search, Clock, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '@/services/analytics';
 import { rateLimiter, formatTimeRemaining } from '@/utils/rateLimiter';
+import { updateChallengeScores } from '@/services/challengeService';
+
 
 export function AddPlantPage() {
   const { currentUser } = useAuth();
@@ -53,94 +55,98 @@ export function AddPlantPage() {
     setRecentPlants(plants);
   };
 
-  const handleQuickLog = async (plant: Plant) => {
-    if (!currentUser) return;
+const handleQuickLog = async (plant: Plant) => {
+  if (!currentUser) return;
 
-    setLoading(true);
-    try {
+  setLoading(true);
+  try {
+    await createPlantLog(currentUser.id, plant.id, plant.name);
+    await updateChallengeScores(currentUser.id); // ← Add this line
+    
+    // Mark that we just logged a plant
+    sessionStorage.setItem('just_logged_plant', 'true');
+    
+    navigate('/');
+  } catch (error: any) {
+    if (error.message.includes('Rate limit exceeded')) {
+      alert(error.message);
+    } else {
+      alert('Failed to log plant. Please try again.');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleLogPlant = async () => {
+  if (!currentUser || !selectedPlant) return;
+
+  setLoading(true);
+  try {
+    await createPlantLog(currentUser.id, selectedPlant.id, selectedPlant.name);
+    await updateChallengeScores(currentUser.id); // ← Add this line
+    
+    // Mark that we just logged a plant
+    sessionStorage.setItem('just_logged_plant', 'true');
+    
+    navigate('/');
+  } catch (error: any) {
+    if (error.message.includes('Rate limit exceeded')) {
+      alert(error.message);
+    } else {
+      alert('Failed to log plant. Please try again.');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleBulkLog = async (plants: Plant[]) => {
+  if (!currentUser) return;
+
+  // Check bulk rate limit
+  if (!rateLimiter.checkLimit(currentUser.id, 'bulk_log')) {
+    const resetTime = rateLimiter.getResetTime(currentUser.id, 'bulk_log');
+    alert(
+      `You've used too many bulk logs recently. Try again in ${formatTimeRemaining(resetTime)}`
+    );
+    return;
+  }
+
+  // Check if individual logs would be rate limited
+  const remaining = rateLimiter.getRemaining(currentUser.id, 'plant_log');
+  if (plants.length > remaining) {
+    alert(
+      `You can only log ${remaining} more plants today. Try logging fewer plants or wait 24 hours.`
+    );
+    return;
+  }
+
+  try {
+    for (const plant of plants) {
       await createPlantLog(currentUser.id, plant.id, plant.name);
-      
-      // Mark that we just logged a plant
-      sessionStorage.setItem('just_logged_plant', 'true');
-      
-      navigate('/');
-    } catch (error: any) {
-      if (error.message.includes('Rate limit exceeded')) {
-        alert(error.message);
-      } else {
-        alert('Failed to log plant. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogPlant = async () => {
-    if (!currentUser || !selectedPlant) return;
-
-    setLoading(true);
-    try {
-      await createPlantLog(currentUser.id, selectedPlant.id, selectedPlant.name);
-      
-      // Mark that we just logged a plant
-      sessionStorage.setItem('just_logged_plant', 'true');
-      
-      navigate('/');
-    } catch (error: any) {
-      if (error.message.includes('Rate limit exceeded')) {
-        alert(error.message);
-      } else {
-        alert('Failed to log plant. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBulkLog = async (plants: Plant[]) => {
-    if (!currentUser) return;
-
-    // Check bulk rate limit
-    if (!rateLimiter.checkLimit(currentUser.id, 'bulk_log')) {
-      const resetTime = rateLimiter.getResetTime(currentUser.id, 'bulk_log');
-      alert(
-        `You've used too many bulk logs recently. Try again in ${formatTimeRemaining(resetTime)}`
-      );
-      return;
     }
 
-    // Check if individual logs would be rate limited
-    const remaining = rateLimiter.getRemaining(currentUser.id, 'plant_log');
-    if (plants.length > remaining) {
-      alert(
-        `You can only log ${remaining} more plants today. Try logging fewer plants or wait 24 hours.`
-      );
-      return;
+    await updateChallengeScores(currentUser.id); // ← Add this line
+
+    // Track bulk log event
+    trackEvent('bulk_plants_logged', {
+      count: plants.length,
+      plantIds: plants.map(p => p.id),
+    });
+
+    // Mark that we just logged plants
+    sessionStorage.setItem('just_logged_plant', 'true');
+
+    navigate('/');
+  } catch (error: any) {
+    if (error.message.includes('Rate limit exceeded')) {
+      alert(error.message);
+    } else {
+      alert('Failed to log plants. Please try again.');
     }
-
-    try {
-      for (const plant of plants) {
-        await createPlantLog(currentUser.id, plant.id, plant.name);
-      }
-
-      // Track bulk log event
-      trackEvent('bulk_plants_logged', {
-        count: plants.length,
-        plantIds: plants.map(p => p.id),
-      });
-
-      // Mark that we just logged plants
-      sessionStorage.setItem('just_logged_plant', 'true');
-
-      navigate('/');
-    } catch (error: any) {
-      if (error.message.includes('Rate limit exceeded')) {
-        alert(error.message);
-      } else {
-        alert('Failed to log plants. Please try again.');
-      }
-    }
-  };
+  }
+};
 
   const isAlreadyLogged = selectedPlant
     ? loggedPlantIds.has(selectedPlant.id)

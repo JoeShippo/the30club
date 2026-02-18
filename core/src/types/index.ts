@@ -137,6 +137,8 @@ export interface UserStats {
   achievements: Achievement[];
     categoriesExplored: Set<string>; // ← Add this
   challengeWins: number; // ← Add this
+    referralCount: number; // ← Add this
+  referredBy: string | null; // ← Add this (userId of referrer)
   updatedAt: Date;
 }
 
@@ -145,8 +147,8 @@ export interface Achievement {
   name: string;
   description: string;
   icon: string;
-  unlockedAt: Date;
-  category: 'milestone' | 'streak' | 'variety' | 'social';
+  category: 'milestone' | 'weekly' | 'streak' | 'variety' | 'social' | 'exploration';
+  unlockedAt?: Date; // ← Make this optional
 }
 
 export interface WeeklyProgress {
@@ -157,7 +159,7 @@ export interface WeeklyProgress {
   endDate: Date;
 }
 
-export const ACHIEVEMENTS: Record<string, Omit<Achievement, 'unlockedAt'>> = {
+export const ACHIEVEMENTS: Record<string, Achievement> = {
   FIRST_PLANT: {
     id: 'first_plant',
     name: 'First Steps',
@@ -170,83 +172,126 @@ export const ACHIEVEMENTS: Record<string, Omit<Achievement, 'unlockedAt'>> = {
     name: 'Gaining Momentum',
     description: 'Reach 10 unique plants in a week',
     icon: '🌿',
-    category: 'milestone',
+    category: 'weekly',
   },
   REACHED_20: {
     id: 'reached_20',
     name: 'Plant Explorer',
     description: 'Reach 20 unique plants in a week',
     icon: '🍃',
-    category: 'milestone',
+    category: 'weekly',
   },
   REACHED_30: {
     id: 'reached_30',
     name: '30 Plants Champion!',
     description: 'Reach the goal of 30 unique plants in a week',
     icon: '🏆',
-    category: 'milestone',
+    category: 'weekly',
   },
   REACHED_40: {
     id: 'reached_40',
-    name: 'Beyond Limits',
-    description: 'Reach 40 unique plants in a week',
-    icon: '⭐',
-    category: 'milestone',
+    name: 'Plant Master',
+    description: 'Exceed 40 unique plants in a week',
+    icon: '👑',
+    category: 'weekly',
   },
-  STREAK_3: {
-    id: 'streak_3',
-    name: 'Committed',
-    description: 'Maintain a 3-week streak',
+  
+  // Streak achievements - ADD THESE
+  WEEK_STREAK_2: {
+    id: 'week_streak_2',
+    name: 'Getting Started',
+    description: 'Maintain a 2-week streak',
     icon: '🔥',
     category: 'streak',
   },
-  STREAK_5: {
-    id: 'streak_5',
-    name: 'Dedicated',
-    description: 'Maintain a 5-week streak',
+  WEEK_STREAK_4: {
+    id: 'week_streak_4',
+    name: 'Committed',
+    description: 'Maintain a 4-week streak',
     icon: '💪',
     category: 'streak',
   },
-  STREAK_10: {
-    id: 'streak_10',
-    name: 'Unstoppable',
-    description: 'Maintain a 10-week streak',
-    icon: '🚀',
+  WEEK_STREAK_8: {
+    id: 'week_streak_8',
+    name: 'Dedicated',
+    description: 'Maintain an 8-week streak',
+    icon: '🔥',
     category: 'streak',
   },
-  ALL_CATEGORIES: {
-    id: 'all_categories',
-    name: 'Diverse Diet',
-    description: 'Log plants from all 9 categories in one week',
+  WEEK_STREAK_12: {
+    id: 'week_streak_12',
+    name: 'Unstoppable',
+    description: 'Maintain a 12-week streak',
+    icon: '⚡',
+    category: 'streak',
+  },
+
+  // Category exploration
+  TRY_5_CATEGORIES: {
+    id: 'try_5_categories',
+    name: 'Category Explorer',
+    description: 'Try plants from 5 different categories',
+    icon: '🗺️',
+    category: 'exploration',
+  },
+  TRY_10_CATEGORIES: {
+    id: 'try_10_categories',
+    name: 'Diversity Master',
+    description: 'Try plants from all 10 categories',
     icon: '🌈',
-    category: 'variety',
+    category: 'exploration',
   },
-  FIRST_LEAGUE: {
-    id: 'first_league',
-    name: 'Team Player',
-    description: 'Join your first league',
-    icon: '👥',
+
+  // Challenge achievements
+  FIRST_CHALLENGE_WIN: {
+    id: 'first_challenge_win',
+    name: 'First Victory',
+    description: 'Win your first challenge',
+    icon: '🏆',
     category: 'social',
   },
-  FIRST_CHALLENGE: {
-    id: 'first_challenge',
-    name: 'Competitor',
-    description: 'Complete your first 1v1 challenge',
-    icon: '⚔️',
-    category: 'social',
-  },
-  CHALLENGE_WINNER: {
-    id: 'challenge_winner',
-    name: 'Victor',
-    description: 'Win a 1v1 challenge',
+  WIN_5_CHALLENGES: {
+    id: 'win_5_challenges',
+    name: 'Challenge Champion',
+    description: 'Win 5 challenges',
     icon: '🥇',
     category: 'social',
   },
+  WIN_10_CHALLENGES: {
+    id: 'win_10_challenges',
+    name: 'Undefeated',
+    description: 'Win 10 challenges',
+    icon: '👑',
+    category: 'social',
+  },
+
+  // All-time achievements
   TOTAL_100: {
     id: 'total_100',
     name: 'Century Club',
-    description: 'Log 100 different plants all-time',
+    description: 'Log 100 unique plants all-time',
     icon: '💯',
-    category: 'variety',
+    category: 'milestone',
   },
+  FIRST_REFERRAL: {
+  id: 'first_referral',
+  name: 'Spread the Word',
+  description: 'Refer your first friend',
+  icon: '🤝',
+  category: 'social',
+},
+REFER_5_FRIENDS: {
+  id: 'refer_5_friends',
+  name: 'Community Builder',
+  description: 'Refer 5 friends',
+  icon: '👥',
+  category: 'social',
+},
+REFER_10_FRIENDS: {
+  id: 'refer_10_friends',
+  name: 'Ambassador',
+  description: 'Refer 10 friends',
+  icon: '🌟',
+  category: 'social',
+},
 };

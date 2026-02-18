@@ -45,7 +45,8 @@ const loadStats = async () => {
     setStats(stats);
     setProgressHistory(history);
   } catch (error) {
-    //console.error('=== STATS ERROR ===', error);
+    console.error('=== STATS ERROR ===', error); // ← Make sure this is uncommented
+    alert(`Error loading stats: ${error}`); // ← Add this to see the error
   } finally {
     setLoading(false);
   }
@@ -177,14 +178,14 @@ const safeFormat = (date: any, formatStr: string): string => {
 
           {/* Y-axis */}
         <div className="flex flex-col justify-between text-right shrink-0 pb-5" style={{ height: '160px' }}>
-          {(() => {
-            const roundedMax = Math.ceil(maxScore / 5) * 5;
-            const steps = [roundedMax, roundedMax * 0.75, roundedMax * 0.5, roundedMax * 0.25, 0]
-              .map(v => Math.round(v / 5) * 5);
-            return steps.map(val => (
-              <span key={val} className="text-xs opacity-40 leading-none">{val}</span>
-            ));
-          })()}
+{(() => {
+  const roundedMax = Math.ceil(maxScore / 5) * 5;
+  const steps = [roundedMax, roundedMax * 0.75, roundedMax * 0.5, roundedMax * 0.25, 0]
+    .map(v => Math.round(v / 5) * 5);
+  return steps.map((val, index) => (
+    <span key={index} className="text-xs opacity-40 leading-none">{val}</span>
+  ));
+})()}
         </div>
 
           {/* Bars + X-axis */}
@@ -294,6 +295,14 @@ const safeFormat = (date: any, formatStr: string): string => {
                   <span className="opacity-60">Total logs</span>
                   <span className="font-semibold">{stats.totalLogs}</span>
                 </div>
+                <div className="divider my-0 opacity-30" />
+                      <div className="flex justify-between">
+        <span className="opacity-60">Friends Referred</span>
+        <span className="font-semibold flex items-center gap-2">
+          {stats.referralCount}
+          {stats.referralCount >= 1 && <span>🤝</span>}
+        </span>
+      </div>
               </div>
 
             </div>

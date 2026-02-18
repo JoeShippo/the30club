@@ -25,11 +25,28 @@ export async function getUserStats(userId: string): Promise<UserStats | null> {
   if (!docSnap.exists()) return null;
 
   const data = docSnap.data();
-  return {
-    ...data,
-    updatedAt: data.updatedAt?.toDate() || new Date(),
-    achievements: data.achievements || [],
+  
+    return {
+    userId: data.userId,
+    currentStreak: data.currentStreak || 0,
+    longestStreak: data.longestStreak || 0,
+    totalWeeksActive: data.totalWeeksActive || 0,
+    totalUniquePlants: data.totalUniquePlants || 0,
+    totalLogs: data.totalLogs || 0,
+    bestWeekScore: data.bestWeekScore || 0,
+    bestWeekId: data.bestWeekId || null,
+    averageWeeklyScore: data.averageWeeklyScore || 0,
+    categoriesExplored: new Set(data.categoriesExplored || []),
+    challengeWins: data.challengeWins || 0,
+    referralCount: data.referralCount || 0, // ← Add this
+    referredBy: data.referredBy || null, // ← Add this
+    achievements: data.achievements?.map((a: any) => ({
+      ...a,
+      unlockedAt: a.unlockedAt?.toDate?.() || new Date(a.unlockedAt),
+    })) || [],
+    updatedAt: data.updatedAt?.toDate?.() || new Date(),
   } as UserStats;
+
 }
 
 export async function updateUserStats(userId: string): Promise<UserStats> {
@@ -38,6 +55,13 @@ export async function updateUserStats(userId: string): Promise<UserStats> {
     collection(db, COLLECTIONS.WEEKLY_SUMMARIES),
     where('userId', '==', userId),
   );
+
+    const referralsQuery = query(
+    collection(db, COLLECTIONS.ALL_TIME_STATS),
+    where('referredBy', '==', userId)
+  );
+  const referralsSnapshot = await getDocs(referralsQuery);
+  const referralCount = referralsSnapshot.size;
 
   const summariesSnapshot = await getDocs(summariesQuery);
   const weeklySummaries: WeeklySummary[] = summariesSnapshot.docs.map(doc => {
@@ -67,13 +91,36 @@ export async function updateUserStats(userId: string): Promise<UserStats> {
     }
   });
 
-  // Get challenge wins (NEW)
-  const challengesQuery = query(
-    collection(db, COLLECTIONS.CHALLENGES),
-    where('winnerId', '==', userId)
-  );
-  const challengesSnapshot = await getDocs(challengesQuery);
-  const challengeWins = challengesSnapshot.size;
+// Get challenge wins - Query by challengerId and opponentId instead of winnerId
+const challengesAsChallenger = query(
+  collection(db, COLLECTIONS.CHALLENGES),
+  where('challengerId', '==', userId),
+  where('status', '==', 'completed')
+);
+
+const challengesAsOpponent = query(
+  collection(db, COLLECTIONS.CHALLENGES),
+  where('opponentId', '==', userId),
+  where('status', '==', 'completed')
+);
+
+const [challengerSnapshot, opponentSnapshot] = await Promise.all([
+  getDocs(challengesAsChallenger),
+  getDocs(challengesAsOpponent),
+]);
+
+// Count wins by checking winnerId in the results
+let challengeWins = 0;
+
+challengerSnapshot.docs.forEach(doc => {
+  const data = doc.data();
+  if (data.winnerId === userId) challengeWins++;
+});
+
+opponentSnapshot.docs.forEach(doc => {
+  const data = doc.data();
+  if (data.winnerId === userId) challengeWins++;
+});
 
   // Calculate stats
   const allUniquePlants = new Set<string>();
@@ -109,16 +156,28 @@ export async function updateUserStats(userId: string): Promise<UserStats> {
       bestWeekScore,
       categoriesExplored, // ← Added
       challengeWins, // ← Added
+      referralCount
     },
     weeklySummaries,
     existingAchievementIds
   );
 
   // Convert to Achievement objects
-  const newAchievements: Achievement[] = newAchievementIds.map(id => ({
-    ...ACHIEVEMENTS[id.toUpperCase()],
+  const newAchievements: Achievement[] = newAchievementIds.map(id => {
+  console.log('Achievement ID:', id, 'Uppercase:', id.toUpperCase());
+  const achievement = ACHIEVEMENTS[id.toUpperCase()];
+  console.log('Found achievement:', achievement);
+  
+  if (!achievement) {
+    console.error('MISSING ACHIEVEMENT:', id);
+    return null;
+  }
+  
+  return {
+    ...achievement,
     unlockedAt: new Date(),
-  }));
+  };
+}).filter(Boolean) as Achievement[];
 
   const stats: UserStats = {
     userId,
@@ -133,6 +192,8 @@ export async function updateUserStats(userId: string): Promise<UserStats> {
     achievements: [...(existing?.achievements || []), ...newAchievements],
     categoriesExplored, // ← Added
     challengeWins, // ← Added
+     referralCount, // ← Add this
+    referredBy: existing?.referredBy || null, // Keep existing referrer
     updatedAt: new Date(),
   };
 

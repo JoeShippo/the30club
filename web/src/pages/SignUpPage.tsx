@@ -33,6 +33,14 @@ import {
   GiChocolateBar,
 } from "react-icons/gi";
 import { FaLeaf, FaSeedling, FaAppleAlt, FaPepperHot } from "react-icons/fa";
+import { useLocation } from 'react-router-dom';
+import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/firebase/config';
+import { COLLECTIONS } from '@/firebase/collections';
+import { updateUserStats } from '@/services/userStatsService';
+import { query, collection, where, getDocs } from 'firebase/firestore';
+
+
 
 
 const iconConfigs = [
@@ -79,6 +87,10 @@ interface FloatingIcon {
 }
 
 export function SignUpPage() {
+    const location = useLocation();
+  const inviteMessage = location.state?.message;
+    const invitedBy = location.state?.invitedBy; // Username from invite link
+
 
   const heroRef = useRef<HTMLDivElement>(null);
 
@@ -130,42 +142,103 @@ export function SignUpPage() {
   const [error, setError] = useState('');
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  e.preventDefault();
+  setError('');
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
+  if (password !== confirmPassword) {
+    setError('Passwords do not match');
+    return;
+  }
+
+  if (password.length < 6) {
+    setError('Password must be at least 6 characters');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const userCredential = await signUpWithEmail(email, password);
+    const user = userCredential.user;
+
+    // If they were referred, find the referrer and set referredBy
+    if (invitedBy) {
+      try {
+        // Find referrer by username/displayName
+        const usersQuery = query(
+          collection(db, COLLECTIONS.USERS),
+          where('displayName', '==', invitedBy)
+        );
+        const usersSnapshot = await getDocs(usersQuery);
+        
+        if (!usersSnapshot.empty) {
+          const referrerId = usersSnapshot.docs[0].id;
+          
+          // Set referredBy in new user's stats
+          await setDoc(doc(db, COLLECTIONS.ALL_TIME_STATS, user.uid), {
+            userId: user.uid,
+            referredBy: referrerId,
+            referralCount: 0,
+            updatedAt: serverTimestamp(),
+          }, { merge: true });
+
+          // Update referrer's stats to increment their referral count
+          // This will also trigger the referral achievements
+          await updateUserStats(referrerId);
+        }
+      } catch (referralError) {
+        console.error('Error tracking referral:', referralError);
+        // Don't fail signup if referral tracking fails
+      }
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await signUpWithEmail(email, password);
-      // Don't navigate - AuthContext will handle redirect
-    } catch (err: any) {
-      setError(err.message || 'Failed to create account');
-      setLoading(false);
-    }
-  };
+    // AuthContext will handle redirect
+  } catch (err: any) {
+    setError(err.message || 'Failed to create account');
+    setLoading(false);
+  }
+};
 
   const handleGoogleSignUp = async () => {
-    setError('');
-    setLoading(true);
+  setError('');
+  setLoading(true);
 
-    try {
-      await signInWithGoogle();
-      // Don't navigate - AuthContext will handle redirect
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign up with Google');
-      setLoading(false);
+  try {
+    const userCredential = await signInWithGoogle();
+    const user = userCredential.user;
+
+    // If they were referred, track it
+    if (invitedBy) {
+      try {
+        const usersQuery = query(
+          collection(db, COLLECTIONS.USERS),
+          where('displayName', '==', invitedBy)
+        );
+        const usersSnapshot = await getDocs(usersQuery);
+        
+        if (!usersSnapshot.empty) {
+          const referrerId = usersSnapshot.docs[0].id;
+          
+          await setDoc(doc(db, COLLECTIONS.ALL_TIME_STATS, user.uid), {
+            userId: user.uid,
+            referredBy: referrerId,
+            referralCount: 0,
+            updatedAt: serverTimestamp(),
+          }, { merge: true });
+
+          await updateUserStats(referrerId);
+        }
+      } catch (referralError) {
+        console.error('Error tracking referral:', referralError);
+      }
     }
-  };
+
+    // AuthContext will handle redirect
+  } catch (err: any) {
+    setError(err.message || 'Failed to sign up with Google');
+    setLoading(false);
+  }
+};
 
   // const handleAppleSignUp = async () => {
   //   setError('');
@@ -235,6 +308,18 @@ export function SignUpPage() {
       `}</style>
       
       <div className="max-w-xl w-full mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+
+              <div className="card bg-white w-full max-w-md">
+        <div className="card-body">
+          
+          {/* Invite banner */}
+          {inviteMessage && (
+            <div className="alert alert-success mb-4">
+              <span>{inviteMessage}</span>
+            </div>
+          )}
+          </div>
+          </div>
 
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary border-2 mb-2 rounded-full">

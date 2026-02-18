@@ -129,6 +129,8 @@ export function checkAchievements(
     bestWeekScore: number;
     categoriesExplored?: Set<string> | string[]; // Can be Set or Array
     challengeWins?: number;
+        referralCount?: number; // ← Add this
+
   },
   weeklySummaries: WeeklySummary[],
   existingAchievements: string[]
@@ -176,6 +178,12 @@ export function checkAchievements(
     if (userStats.challengeWins >= 1) add('first_challenge_win');
     if (userStats.challengeWins >= 5) add('win_5_challenges');
     if (userStats.challengeWins >= 10) add('win_10_challenges');
+  }
+
+  if (userStats.referralCount) {
+    if (userStats.referralCount >= 1) add('first_referral');
+    if (userStats.referralCount >= 5) add('refer_5_friends');
+    if (userStats.referralCount >= 10) add('refer_10_friends');
   }
 
   return newAchievements;

@@ -17,6 +17,8 @@ import { LeagueDetailPage } from './pages/LeagueDetailPage';
 import { ClubPage } from './pages/ClubPage';
 import { StatsPage } from './pages/StatsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { JoinPage } from '@/pages/JoinPage';
+
 
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -47,6 +49,8 @@ function AppRoutes() {
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/join/:username" element={<JoinPage />} />
+
 
         {/* Protected routes */}
         <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />

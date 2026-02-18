@@ -18,6 +18,7 @@ import { trackEvent } from './analytics';
 import { updateUserStats } from './userStatsService';
 
 
+
 /**
  * Create a new challenge
  */
@@ -34,16 +35,28 @@ export async function createChallenge(
   }
 
   const weekId = getWeekId(new Date());
+  
+  // Calculate expiration (end of the week)
+  const now = new Date();
+  const expiresAt = new Date(now);
+  expiresAt.setDate(now.getDate() + (7 - now.getDay())); // End of current week
+  expiresAt.setHours(23, 59, 59, 999);
 
   const challengeData = {
     challengerId,
+    challengerName: '', // Add user's name if you have it
+    challengerPhoto: null,
     opponentId,
+    opponentName: '', // Add opponent's name
+    opponentPhoto: null,
     weekId,
     status: ChallengeStatus.PENDING,
     challengerScore: 0,
     opponentScore: 0,
+    winnerId: null,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+    expiresAt: expiresAt, // ← Add this
   };
 
   const docRef = await addDoc(collection(db, COLLECTIONS.CHALLENGES), challengeData);
@@ -59,6 +72,7 @@ export async function createChallenge(
     ...challengeData,
     createdAt: new Date(),
     updatedAt: new Date(),
+    expiresAt: expiresAt,
   } as Challenge;
 }
 
@@ -222,4 +236,58 @@ export async function completeChallenge(challengeId: string): Promise<void> {
     winnerId,
     finalScore: `${challenge.challengerScore}-${challenge.opponentScore}`,
   });
+}
+
+
+/**
+ * Update challenge scores for the current week
+ * Call this after logging plants
+ */
+export async function updateChallengeScores(userId: string): Promise<void> {
+  const weekId = getWeekId(new Date());
+
+  // Get user's active challenges for this week
+  const challengesAsChallenger = query(
+    collection(db, COLLECTIONS.CHALLENGES),
+    where('weekId', '==', weekId),
+    where('status', '==', ChallengeStatus.ACTIVE),
+    where('challengerId', '==', userId)
+  );
+
+  const challengesAsOpponent = query(
+    collection(db, COLLECTIONS.CHALLENGES),
+    where('weekId', '==', weekId),
+    where('status', '==', ChallengeStatus.ACTIVE),
+    where('opponentId', '==', userId)
+  );
+
+  const [challengerSnapshot, opponentSnapshot] = await Promise.all([
+    getDocs(challengesAsChallenger),
+    getDocs(challengesAsOpponent),
+  ]);
+
+  // Get user's score for this week
+  const summaryQuery = query(
+    collection(db, COLLECTIONS.WEEKLY_SUMMARIES),
+    where('userId', '==', userId),
+    where('weekId', '==', weekId)
+  );
+  const summarySnapshot = await getDocs(summaryQuery);
+  const userScore = summarySnapshot.empty ? 0 : summarySnapshot.docs[0].data().score;
+
+  // Update challenges where user is challenger
+  for (const doc of challengerSnapshot.docs) {
+    await updateDoc(doc.ref, {
+      challengerScore: userScore,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  // Update challenges where user is opponent
+  for (const doc of opponentSnapshot.docs) {
+    await updateDoc(doc.ref, {
+      opponentScore: userScore,
+      updatedAt: serverTimestamp(),
+    });
+  }
 }
