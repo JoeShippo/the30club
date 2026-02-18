@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, PlusCircle, BarChart3, User, Users, Swords, Leaf } from 'lucide-react';
-import { FEATURES, PRO_FEATURES } from '@/config/features';
+import { Home, PlusCircle, BarChart3, User, Users, Leaf } from 'lucide-react';
 import { ProBadge } from './ProBadge';
 
 export function Sidebar() {
@@ -10,18 +9,7 @@ export function Sidebar() {
     { path: '/', icon: Home, label: 'Home', isPro: false },
     { path: '/add', icon: PlusCircle, label: 'Add Plant', isPro: false },
     { path: '/stats', icon: BarChart3, label: 'Stats', isPro: false },
-    ...(FEATURES.LEAGUES ? [{ 
-      path: '/leagues', 
-      icon: Users, 
-      label: 'Leagues',
-      isPro: PRO_FEATURES.LEAGUES 
-    }] : []),
-    ...(FEATURES.CHALLENGES ? [{ 
-      path: '/challenges', 
-      icon: Swords, 
-      label: 'Challenges',
-      isPro: PRO_FEATURES.CHALLENGES 
-    }] : []),
+    { path: '/club', icon: Users, label: 'The Club', isPro: false },
     { path: '/profile', icon: User, label: 'Profile', isPro: false },
   ];
 

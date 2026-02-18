@@ -59,6 +59,25 @@ export async function getWeeklySummary(
   } as WeeklySummary;
 }
 
+export async function getWeeklySummaries(weekId: string): Promise<WeeklySummary[]> {
+  const q = query(
+    collection(db, COLLECTIONS.WEEKLY_SUMMARIES),
+    where('weekId', '==', weekId)
+  );
+
+  const snapshot = await getDocs(q);
+  
+  return snapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: data.createdAt?.toDate() || new Date(),
+      updatedAt: data.updatedAt?.toDate() || new Date(),
+    } as WeeklySummary;
+  });
+}
+
 export async function getWeeklyLeaderboard(
   weekId: string,
   limitCount: number = 50

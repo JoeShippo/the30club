@@ -9,11 +9,12 @@ import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { HomePage } from './pages/HomePage';
 import { AddPlantPage } from './pages/AddPlantPage';
-import { LeaderboardPage } from './pages/LeaderboardPage';
+//import { LeaderboardPage } from './pages/LeaderboardPage';
 import { ProfilePage } from './pages/ProfilePage';
-import { LeaguesPage } from './pages/LeaguesPage';
+//import { LeaguesPage } from './pages/LeaguesPage';
 import { LeagueDetailPage } from './pages/LeagueDetailPage';
-import { ChallengesPage } from './pages/ChallengesPage';
+//import { ChallengesPage } from './pages/ChallengesPage';
+import { ClubPage } from './pages/ClubPage';
 import { StatsPage } from './pages/StatsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
@@ -49,15 +50,13 @@ function AppRoutes() {
 
         {/* Protected routes */}
         <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-        <Route path="/add" element={<ProtectedRoute><AddPlantPage /></ProtectedRoute>} />
-        <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
-        <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
-        <Route path="/leagues" element={<ProtectedRoute><LeaguesPage /></ProtectedRoute>} />
-        <Route path="/leagues/:leagueId" element={<ProtectedRoute><LeagueDetailPage /></ProtectedRoute>} />
-        <Route path="/challenges" element={<ProtectedRoute><ChallengesPage /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        
-        {/* 404 - Must be last */}
+  <Route path="/add" element={<ProtectedRoute><AddPlantPage /></ProtectedRoute>} />
+  <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+  <Route path="/club" element={<ProtectedRoute><ClubPage /></ProtectedRoute>} /> {/* ← New */}
+  <Route path="/club/leagues/:leagueId" element={<ProtectedRoute><LeagueDetailPage /></ProtectedRoute>} />
+  <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+  
+  {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>

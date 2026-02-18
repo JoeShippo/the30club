@@ -104,13 +104,20 @@ export interface Challenge {
   opponentName: string;
   opponentPhoto: string | null;
   weekId: string;
-  status: 'pending' | 'accepted' | 'declined' | 'completed';
+  status: ChallengeStatus;
   challengerScore: number;
   opponentScore: number;
   winnerId: string | null;
   createdAt: Date;
   updatedAt: Date;
   expiresAt: Date;
+}
+
+export enum ChallengeStatus {
+  PENDING = 'pending',
+  ACTIVE = 'active', // ← Keep as ACTIVE and update DB values
+  DECLINED = 'declined',
+  COMPLETED = 'completed',
 }
 
 export interface LeagueLeaderboardEntry extends LeaderboardEntry {
@@ -128,6 +135,8 @@ export interface UserStats {
   bestWeekId: string | null;
   averageWeeklyScore: number;
   achievements: Achievement[];
+    categoriesExplored: Set<string>; // ← Add this
+  challengeWins: number; // ← Add this
   updatedAt: Date;
 }
 

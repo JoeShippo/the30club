@@ -127,6 +127,8 @@ export function checkAchievements(
     totalLogs: number;
     totalUniquePlants: number;
     bestWeekScore: number;
+    categoriesExplored?: Set<string> | string[]; // Can be Set or Array
+    challengeWins?: number;
   },
   weeklySummaries: WeeklySummary[],
   existingAchievements: string[]
@@ -151,12 +153,30 @@ export function checkAchievements(
   // Streak milestones
   const { currentStreak, longestStreak } = calculateStreak(weeklySummaries);
   const maxStreak = Math.max(currentStreak, longestStreak);
-  if (maxStreak >= 3) add('streak_3');
-  if (maxStreak >= 5) add('streak_5');
-  if (maxStreak >= 10) add('streak_10');
+  if (maxStreak >= 2) add('week_streak_2');
+  if (maxStreak >= 4) add('week_streak_4');
+  if (maxStreak >= 8) add('week_streak_8');
+  if (maxStreak >= 12) add('week_streak_12');
 
   // All-time unique plants
   if (userStats.totalUniquePlants >= 100) add('total_100');
+
+  // Category exploration (NEW)
+  if (userStats.categoriesExplored) {
+    const categoryCount = userStats.categoriesExplored instanceof Set 
+      ? userStats.categoriesExplored.size 
+      : userStats.categoriesExplored.length;
+    
+    if (categoryCount >= 5) add('try_5_categories');
+    if (categoryCount >= 10) add('try_10_categories');
+  }
+
+  // Challenge wins (NEW)
+  if (userStats.challengeWins) {
+    if (userStats.challengeWins >= 1) add('first_challenge_win');
+    if (userStats.challengeWins >= 5) add('win_5_challenges');
+    if (userStats.challengeWins >= 10) add('win_10_challenges');
+  }
 
   return newAchievements;
 }

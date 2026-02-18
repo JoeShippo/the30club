@@ -1,0 +1,19 @@
+4. Revised Freemium Model
+Here's a clean structure:
+Free Forever:
+
+✅ Log unlimited plants
+✅ Weekly tracking & progress
+✅ Global leaderboard (top 50)
+✅ Basic stats (current week only)
+✅ Receive challenges from Pro users
+✅ Basic achievements
+
+Pro (£2.99 one-time):
+
+👑 Challenge friends (unlimited)
+👑 Create private leagues (up to 10)
+👑 Full stats history (all weeks, streaks, charts)
+👑 All achievements (exclusive badges)
+👑 Priority support
+👑 Early access to new features

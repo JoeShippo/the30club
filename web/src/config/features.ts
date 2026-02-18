@@ -12,6 +12,7 @@ export const PRO_FEATURES = {
 // Whitelist of user IDs who get Pro features for free (beta testers, etc)
 export const PRO_WHITELIST: string[] = [  // ← Changed from `as const` to `: string[]`
   'xY92P6mRmra3VtXj9Rs1azmVC412', // Your user ID
+  'ZPgqntlh7HMNcxvArxjjBhvAwa92',
   // Add more user IDs here
 ];
 

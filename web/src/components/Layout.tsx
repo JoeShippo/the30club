@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, User, PlusCircle, BarChart3, Users } from 'lucide-react';
 import { Sidebar } from './Sidebar';
-import { FEATURES, PRO_FEATURES } from '@/config/features';
+//import { FEATURES, PRO_FEATURES } from '@/config/features';
 import { ProBadge } from './ProBadge';
 
 interface LayoutProps {
@@ -12,18 +12,13 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
 
-  const navItems = [
-    { path: '/', icon: Home, label: 'Home', isPro: false },
-    { path: '/add', icon: PlusCircle, label: 'Add', isPro: false },
-    { path: '/stats', icon: BarChart3, label: 'Stats', isPro: false },
-    ...(FEATURES.LEAGUES ? [{ 
-      path: '/leagues', 
-      icon: Users, 
-      label: 'Social',
-      isPro: PRO_FEATURES.LEAGUES 
-    }] : []),
-    { path: '/profile', icon: User, label: 'Profile', isPro: false },
-  ];
+const navItems = [
+  { path: '/', icon: Home, label: 'Home', isPro: false },
+  { path: '/add', icon: PlusCircle, label: 'Add', isPro: false },
+  { path: '/stats', icon: BarChart3, label: 'Stats', isPro: false },
+  { path: '/club', icon: Users, label: 'Club', isPro: false }, // ← Changed
+  { path: '/profile', icon: User, label: 'Profile', isPro: false },
+];
 
   return (
     <div className="min-h-screen flex bg-base-100">

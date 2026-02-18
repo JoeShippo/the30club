@@ -15,6 +15,8 @@ import { db } from '@/firebase/config';
 import { COLLECTIONS } from '@/firebase/collections';
 import { UserStats, Achievement, ACHIEVEMENTS, WeeklySummary, WeeklyProgress } from '@30plants/core';
 import { calculateStreak, checkAchievements } from '@30plants/core';
+import { getPlantById } from '@30plants/core';
+
 
 export async function getUserStats(userId: string): Promise<UserStats | null> {
   const docRef = doc(db, COLLECTIONS.ALL_TIME_STATS, userId);
@@ -31,19 +33,14 @@ export async function getUserStats(userId: string): Promise<UserStats | null> {
 }
 
 export async function updateUserStats(userId: string): Promise<UserStats> {
-  //console.log('updateUserStats called for:', userId);
-
-
   // Get all weekly summaries
-  const q = query(
+  const summariesQuery = query(
     collection(db, COLLECTIONS.WEEKLY_SUMMARIES),
     where('userId', '==', userId),
   );
 
-  const querySnapshot = await getDocs(q);
-    //console.log('weeklySummaries found:', querySnapshot.docs.length);
-  //console.log('docs:', querySnapshot.docs.map(d => d.data()));
-  const weeklySummaries: WeeklySummary[] = querySnapshot.docs.map(doc => {
+  const summariesSnapshot = await getDocs(summariesQuery);
+  const weeklySummaries: WeeklySummary[] = summariesSnapshot.docs.map(doc => {
     const data = doc.data();
     return {
       ...data,
@@ -53,6 +50,30 @@ export async function updateUserStats(userId: string): Promise<UserStats> {
       updatedAt: data.updatedAt?.toDate() || new Date(),
     } as WeeklySummary;
   });
+
+  // Get all plant logs to track categories (NEW)
+  const logsQuery = query(
+    collection(db, COLLECTIONS.PLANT_LOGS),
+    where('userId', '==', userId)
+  );
+  const logsSnapshot = await getDocs(logsQuery);
+  const categoriesExplored = new Set<string>();
+  
+  logsSnapshot.docs.forEach(doc => {
+    const log = doc.data();
+    const plant = getPlantById(log.plantId);
+    if (plant) {
+      categoriesExplored.add(plant.category);
+    }
+  });
+
+  // Get challenge wins (NEW)
+  const challengesQuery = query(
+    collection(db, COLLECTIONS.CHALLENGES),
+    where('winnerId', '==', userId)
+  );
+  const challengesSnapshot = await getDocs(challengesQuery);
+  const challengeWins = challengesSnapshot.size;
 
   // Calculate stats
   const allUniquePlants = new Set<string>();
@@ -80,12 +101,14 @@ export async function updateUserStats(userId: string): Promise<UserStats> {
   const existing = await getUserStats(userId);
   const existingAchievementIds = existing?.achievements.map(a => a.id) || [];
 
-  // Check for new achievements
+  // Check for new achievements (with category and challenge data)
   const newAchievementIds = checkAchievements(
     {
       totalLogs,
       totalUniquePlants: allUniquePlants.size,
       bestWeekScore,
+      categoriesExplored, // ← Added
+      challengeWins, // ← Added
     },
     weeklySummaries,
     existingAchievementIds
@@ -108,6 +131,8 @@ export async function updateUserStats(userId: string): Promise<UserStats> {
     bestWeekId,
     averageWeeklyScore,
     achievements: [...(existing?.achievements || []), ...newAchievements],
+    categoriesExplored, // ← Added
+    challengeWins, // ← Added
     updatedAt: new Date(),
   };
 
@@ -115,6 +140,7 @@ export async function updateUserStats(userId: string): Promise<UserStats> {
   const docRef = doc(db, COLLECTIONS.ALL_TIME_STATS, userId);
   await setDoc(docRef, {
     ...stats,
+    categoriesExplored: Array.from(categoriesExplored), // Convert Set to Array for Firestore
     updatedAt: serverTimestamp(),
   }, { merge: true });
 
