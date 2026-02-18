@@ -8,7 +8,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/firebase/config';
 import { COLLECTIONS } from '@/firebase/collections';
-import { User } from '@core/types';
+//import { User } from '@core/types';
 
 export interface UserSearchResult {
   id: string;
@@ -49,7 +49,7 @@ export async function searchUsers(searchQuery: string): Promise<UserSearchResult
  */
 export async function getTopUsers(limitCount: number = 10): Promise<UserSearchResult[]> {
   // We'll get users from the current week's leaderboard
-  const currentWeekId = new Date().toISOString().slice(0, 10); // Simple date-based week
+ // const currentWeekId = new Date().toISOString().slice(0, 10); // Simple date-based week
   
   const q = query(
     collection(db, COLLECTIONS.WEEKLY_SUMMARIES),

@@ -4,7 +4,7 @@ import { Users, Swords, Trophy, UserPlus, Search, Share2, Clock, Check, X } from
 import { searchUsers, getTopUsers, generateInviteLink } from '@/services/userSearchService';
 import { UserCard } from '@/components/UserCard';
 import { useAuth } from '@/auth/AuthContext';
-import { getUserChallenges, getPendingChallenges, acceptChallenge, declineChallenge } from '@/services/challengeService';
+import { getUserChallenges, acceptChallenge, declineChallenge } from '@/services/challengeService';
 import { getUserById } from '@/services/userService';
 import { ChallengeCard } from '@/components/ChallengeCard';
 import { ProFeatureGate } from '@/components/ProFeatureGate';
